@@ -1,18 +1,22 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { posts, getPostBySlug, formatDate } from '@/lib/posts'
+import fs from 'fs'
+import path from 'path'
+import { compileMDX } from 'next-mdx-remote/rsc'
+import { getPosts, getPostBySlug, formatDate } from '@/lib/posts'
+import { useMDXComponents } from '@/mdx-components'
 
 export function generateStaticParams() {
-  return posts.map((p) => ({ slug: p.slug }))
+  return getPosts().map((p) => ({ slug: p.slug }))
 }
 
-export const dynamicParams = false
+export const dynamicParams = true
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const post = getPostBySlug(slug)
   if (!post) return {}
-  return { title: `${post.title} — TBWA \ IA & Publicidade`, description: post.excerpt }
+  return { title: `${post.title} — TBWA \\ IA & Publicidade`, description: post.excerpt }
 }
 
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -20,7 +24,12 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
   const post = getPostBySlug(slug)
   if (!post) notFound()
 
-  const { default: Content } = await import(`@/content/posts/${slug}.mdx`)
+  const filePath = path.join(process.cwd(), 'content/posts', `${slug}.mdx`)
+  if (!fs.existsSync(filePath)) notFound()
+
+  const source = fs.readFileSync(filePath, 'utf8')
+  const components = useMDXComponents()
+  const { content } = await compileMDX({ source, components })
 
   return (
     <>
@@ -61,9 +70,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
       {/* Article body */}
       <div className="max-w-5xl mx-auto px-6">
         <div className="max-w-2xl py-14">
-          <article>
-            <Content />
-          </article>
+          <article>{content}</article>
         </div>
       </div>
     </>
