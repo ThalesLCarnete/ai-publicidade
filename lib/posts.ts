@@ -13,22 +13,22 @@ export type Post = {
 const MANIFEST = path.join(process.cwd(), 'content/posts/manifest.json')
 const CONTENT_DIR = path.join(process.cwd(), 'content/posts')
 
-function useDB(): boolean {
-  return !!process.env.POSTGRES_URL
+function useBlob(): boolean {
+  return !!process.env.BLOB_READ_WRITE_TOKEN
 }
 
 export async function getPosts(): Promise<Post[]> {
-  if (useDB()) {
-    const { dbGetPosts } = await import('./db')
-    return dbGetPosts()
+  if (useBlob()) {
+    const { blobGetPosts } = await import('./blob-store')
+    return blobGetPosts()
   }
   return JSON.parse(fs.readFileSync(MANIFEST, 'utf8'))
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | undefined> {
-  if (useDB()) {
-    const { dbGetPostWithContent } = await import('./db')
-    const post = await dbGetPostWithContent(slug)
+  if (useBlob()) {
+    const { blobGetPostWithContent } = await import('./blob-store')
+    const post = await blobGetPostWithContent(slug)
     return post ?? undefined
   }
   const posts: Post[] = JSON.parse(fs.readFileSync(MANIFEST, 'utf8'))
@@ -36,9 +36,9 @@ export async function getPostBySlug(slug: string): Promise<Post | undefined> {
 }
 
 export async function getPostContent(slug: string): Promise<string> {
-  if (useDB()) {
-    const { dbGetPostWithContent } = await import('./db')
-    const post = await dbGetPostWithContent(slug)
+  if (useBlob()) {
+    const { blobGetPostWithContent } = await import('./blob-store')
+    const post = await blobGetPostWithContent(slug)
     return post?.content ?? ''
   }
   const filePath = path.join(CONTENT_DIR, `${slug}.mdx`)

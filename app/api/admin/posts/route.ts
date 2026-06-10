@@ -6,27 +6,16 @@ import type { Post } from '@/lib/posts'
 const MANIFEST = path.join(process.cwd(), 'content/posts/manifest.json')
 const CONTENT_DIR = path.join(process.cwd(), 'content/posts')
 
-function useDB(): boolean {
-  return !!process.env.POSTGRES_URL
-}
-
-async function fsGetPosts(): Promise<Post[]> {
-  return JSON.parse(fs.readFileSync(MANIFEST, 'utf8'))
-}
-
-async function fsCreatePost(post: Post & { content: string }) {
-  fs.writeFileSync(path.join(CONTENT_DIR, `${post.slug}.mdx`), post.content, 'utf8')
-  const posts = await fsGetPosts()
-  posts.unshift(post)
-  fs.writeFileSync(MANIFEST, JSON.stringify(posts, null, 2))
+function useBlob(): boolean {
+  return !!process.env.BLOB_READ_WRITE_TOKEN
 }
 
 export async function GET() {
-  if (useDB()) {
-    const { dbGetPosts } = await import('@/lib/db')
-    return NextResponse.json(await dbGetPosts())
+  if (useBlob()) {
+    const { blobGetPosts } = await import('@/lib/blob-store')
+    return NextResponse.json(await blobGetPosts())
   }
-  return NextResponse.json(await fsGetPosts())
+  return NextResponse.json(JSON.parse(fs.readFileSync(MANIFEST, 'utf8')))
 }
 
 export async function POST(req: NextRequest) {
@@ -37,20 +26,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'slug, title e content são obrigatórios' }, { status: 400 })
   }
 
-  if (useDB()) {
-    const { dbGetPostWithContent, dbCreatePost } = await import('@/lib/db')
-    const existing = await dbGetPostWithContent(slug)
-    if (existing) return NextResponse.json({ error: 'Slug já existe' }, { status: 409 })
-    const post: Post & { content: string } = { slug, title, excerpt, date, readTime, category, content }
-    await dbCreatePost(post)
+  const post: Post & { content: string } = { slug, title, excerpt, date, readTime, category, content }
+
+  if (useBlob()) {
+    const { blobCreatePost } = await import('@/lib/blob-store')
+    try {
+      await blobCreatePost(post)
+    } catch {
+      return NextResponse.json({ error: 'Slug já existe' }, { status: 409 })
+    }
     return NextResponse.json(post, { status: 201 })
   }
 
-  const posts = await fsGetPosts()
+  const posts: Post[] = JSON.parse(fs.readFileSync(MANIFEST, 'utf8'))
   if (posts.find((p) => p.slug === slug)) {
     return NextResponse.json({ error: 'Slug já existe' }, { status: 409 })
   }
-  const post: Post & { content: string } = { slug, title, excerpt, date, readTime, category, content }
-  await fsCreatePost(post)
+  fs.writeFileSync(path.join(CONTENT_DIR, `${slug}.mdx`), content, 'utf8')
+  posts.unshift(post)
+  fs.writeFileSync(MANIFEST, JSON.stringify(posts, null, 2))
   return NextResponse.json(post, { status: 201 })
 }
