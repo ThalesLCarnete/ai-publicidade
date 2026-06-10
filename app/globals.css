@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is([data-theme=dark] *), &[data-theme=dark]);
+
+@theme {
+  --color-y: #FFE600;
+  --color-ink: #0A0A0A;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist);
+  --font-display: var(--font-bebas);
+}
