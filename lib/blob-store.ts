@@ -1,4 +1,4 @@
-import { put, list } from '@vercel/blob'
+import { put, list, get } from '@vercel/blob'
 import fs from 'fs'
 import path from 'path'
 import type { Post } from './posts'
@@ -17,13 +17,22 @@ async function findBlobUrl(): Promise<string | null> {
 async function readDB(): Promise<PostWithContent[]> {
   const url = await findBlobUrl()
   if (!url) return []
-  const res = await fetch(url, { cache: 'no-store' })
-  return res.json()
+  const result = await get(url, { access: 'private' })
+  if (!result || result.statusCode === 304) return []
+  const chunks: Uint8Array[] = []
+  const reader = result.stream.getReader()
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    if (value) chunks.push(value)
+  }
+  const text = Buffer.concat(chunks.map((c) => Buffer.from(c))).toString('utf8')
+  return JSON.parse(text)
 }
 
 async function writeDB(posts: PostWithContent[]) {
   await put(BLOB_KEY, JSON.stringify(posts, null, 2), {
-    access: 'public',
+    access: 'private',
     addRandomSuffix: false,
     contentType: 'application/json',
   })
