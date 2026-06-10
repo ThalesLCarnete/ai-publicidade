@@ -1,7 +1,11 @@
-import { posts } from '@/lib/posts'
+import { getPosts } from '@/lib/posts'
 import { ArticleCard } from '@/components/ArticleCard'
 
-export default function HomePage() {
+export const dynamic = 'force-dynamic'
+
+export default async function HomePage() {
+  const posts = await getPosts()
+
   return (
     <>
       {/* Hero */}

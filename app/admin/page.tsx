@@ -4,8 +4,8 @@ import { DeleteButton } from './DeleteButton'
 
 export const dynamic = 'force-dynamic'
 
-export default function AdminPostsPage() {
-  const posts = getPosts()
+export default async function AdminPostsPage() {
+  const posts = await getPosts()
 
   return (
     <div className="p-8">
