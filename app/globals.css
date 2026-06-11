@@ -11,3 +11,48 @@
   --font-sans: var(--font-geist);
   --font-display: var(--font-bebas);
 }
+
+/* ─── Geometric grid background ─────────────────────────── */
+.geo-grid {
+  background-image:
+    linear-gradient(rgba(255, 230, 0, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 230, 0, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* ─── Scan-line shimmer on images ────────────────────────── */
+@keyframes scan {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+.scanline::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 40%, rgba(255,230,0,0.06) 50%, transparent 60%);
+  animation: scan 3s linear infinite;
+  pointer-events: none;
+}
+
+/* ─── Animated diagonal stripe (hover) ──────────────────── */
+@keyframes stripe-slide {
+  from { background-position: 0 0; }
+  to   { background-position: 40px 0; }
+}
+.stripe-hover:hover {
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent,
+    transparent 8px,
+    rgba(255,230,0,0.04) 8px,
+    rgba(255,230,0,0.04) 16px
+  );
+  animation: stripe-slide 1s linear infinite;
+}
+
+/* ─── Blinking cursor blink ──────────────────────────────── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+.blink { animation: blink 1s step-end infinite; }

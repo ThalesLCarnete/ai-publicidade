@@ -3,9 +3,9 @@ import { put, get, list } from '@vercel/blob'
 
 const HF_TOKEN = process.env.HUGGINGFACE_TOKEN
 const PROMPTS: Record<string, string> = {
-  cover: 'AI marketing technology concept futuristic digital advertising',
-  mid: 'AI data visualization advertising dashboard technology analytics',
-  end: 'creative artificial intelligence digital agency innovation future',
+  cover: 'technological geometry hexagonal grid circuit board neural network advertising technology concept',
+  mid: 'isometric data visualization geometric mesh AI dashboard circuit nodes yellow accent dark background',
+  end: 'abstract geometric diamond pattern digital technology dark minimal clean neon yellow accent lines',
 }
 
 export async function GET(req: NextRequest) {
@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
   }
 
   const basePrompt = PROMPTS[type] ?? PROMPTS.cover
-  const style = 'dark background, minimal geometric shapes, professional ad-tech, no text, no watermark, cinematic lighting'
+  const style = 'technological geometry, circuit board lines, hexagonal grid, dark background #0A0A0A, neon yellow accent #FFE600, no text, no watermark, 8K render, photorealistic'
   const prompt = `${basePrompt}, ${style}`
 
   try {

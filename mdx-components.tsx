@@ -8,27 +8,36 @@ export function useMDXComponents(): MDXComponents {
       </h1>
     ),
     h2: ({ children }) => (
-      <h2 className="font-display text-3xl tracking-wide text-ink dark:text-white mt-12 mb-4 uppercase leading-tight">
-        {children}
-      </h2>
+      <div className="flex items-start gap-3 mt-12 mb-5">
+        <span className="shrink-0 mt-1 flex flex-col items-center gap-1">
+          <span className="w-1.5 h-1.5 bg-y rotate-45" />
+          <span className="w-px flex-1 bg-y/30 min-h-[1rem]" />
+        </span>
+        <h2 className="font-display text-3xl tracking-wide text-ink dark:text-white uppercase leading-tight">
+          {children}
+        </h2>
+      </div>
     ),
     h3: ({ children }) => (
-      <h3 className="font-bold text-lg text-ink dark:text-white mt-8 mb-3 uppercase tracking-wider">
+      <h3 className="font-bold text-base text-ink dark:text-white mt-8 mb-3 uppercase tracking-wider flex items-center gap-2">
+        <span className="w-1 h-1 bg-y rotate-45 shrink-0" />
         {children}
       </h3>
     ),
     p: ({ children }) => (
-      <p className="text-ink/75 dark:text-white/75 leading-[1.8] mb-5 text-[0.95rem]">{children}</p>
+      <p className="text-ink/75 dark:text-white/75 leading-[1.85] mb-5 text-[0.95rem]">
+        {children}
+      </p>
     ),
     ul: ({ children }) => (
-      <ul className="mb-5 space-y-2 pl-0">{children}</ul>
+      <ul className="mb-6 space-y-2 pl-0">{children}</ul>
     ),
     ol: ({ children }) => (
-      <ol className="mb-5 space-y-2 pl-0 list-none counter-reset-[item]">{children}</ol>
+      <ol className="mb-6 space-y-2 pl-0">{children}</ol>
     ),
     li: ({ children }) => (
-      <li className="flex gap-3 text-ink/75 dark:text-white/75 text-[0.95rem] leading-[1.8]">
-        <span className="text-y font-bold shrink-0 mt-0.5">—</span>
+      <li className="flex gap-3 text-ink/75 dark:text-white/75 text-[0.95rem] leading-[1.85]">
+        <span className="text-y font-bold shrink-0 mt-1 text-xs">◆</span>
         <span>{children}</span>
       </li>
     ),
@@ -36,32 +45,56 @@ export function useMDXComponents(): MDXComponents {
       <strong className="font-bold text-ink dark:text-white">{children}</strong>
     ),
     blockquote: ({ children }) => (
-      <blockquote className="border-l-4 border-y pl-5 my-6 text-ink/60 dark:text-white/60 italic">
-        {children}
+      <blockquote className="relative my-8 pl-6 border-l-2 border-y">
+        <span className="absolute -left-1 top-0 w-2 h-2 bg-y rotate-45" />
+        <div className="text-ink/70 dark:text-white/70 italic text-[0.95rem] leading-relaxed">
+          {children}
+        </div>
       </blockquote>
     ),
     code: ({ children }) => (
-      <code className="bg-ink/5 dark:bg-white/10 text-sm px-1.5 py-0.5 font-mono text-ink dark:text-white">
+      <code className="font-mono bg-ink/5 dark:bg-white/10 text-[0.85rem] px-1.5 py-0.5 text-y dark:text-y">
         {children}
       </code>
     ),
+    pre: ({ children }) => (
+      <pre className="relative font-mono text-sm bg-ink dark:bg-white/5 border border-y/20 text-white p-5 my-6 overflow-x-auto">
+        <span className="absolute top-2 right-3 font-mono text-[9px] tracking-widest text-y/40 uppercase">
+          CODE
+        </span>
+        {children}
+      </pre>
+    ),
     hr: () => (
       <div className="flex items-center gap-3 my-10">
-        <span className="text-y font-bold text-lg">\</span>
-        <div className="flex-1 h-px bg-ink/10 dark:bg-white/10" />
+        <div className="flex-1 h-px bg-ink/8 dark:bg-white/8" />
+        <span className="w-2 h-2 bg-y rotate-45" />
+        <div className="w-8 h-px bg-y/40" />
+        <span className="w-1.5 h-1.5 border border-y/60 rotate-45" />
+        <div className="w-8 h-px bg-y/40" />
+        <span className="w-2 h-2 bg-y rotate-45" />
+        <div className="flex-1 h-px bg-ink/8 dark:bg-white/8" />
       </div>
     ),
     img: ({ src, alt }) => (
-      <figure className="my-8 -mx-2">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={src}
-          alt={alt ?? ''}
-          className="w-full object-cover border border-ink/10 dark:border-white/10"
-          loading="lazy"
-        />
+      <figure className="my-8 -mx-2 relative">
+        <div className="relative overflow-hidden border border-y/20">
+          {/* Corner brackets */}
+          <span className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-y z-10" />
+          <span className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-y z-10" />
+          <span className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-y z-10" />
+          <span className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-y z-10" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={src}
+            alt={alt ?? ''}
+            className="w-full object-cover block"
+            loading="lazy"
+          />
+        </div>
         {alt && (
-          <figcaption className="mt-2 text-xs text-ink/40 dark:text-white/40 text-center tracking-wide">
+          <figcaption className="mt-2 flex items-center gap-2 text-xs text-ink/35 dark:text-white/35">
+            <span className="w-1 h-1 bg-y/60 rotate-45 shrink-0" />
             {alt}
           </figcaption>
         )}
