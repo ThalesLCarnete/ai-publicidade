@@ -12,121 +12,76 @@ const TICKER = [
 
 export default async function HomePage() {
   const posts = await getPosts()
-  const featured = posts.slice(0, 2)
-  const older = posts.slice(2)
+  const featured = posts.slice(0, 3)
+  const older = posts.slice(3)
 
   return (
     <>
-      {/* ── Hero full-viewport ────────────────────────────── */}
-      <section className="relative min-h-[100svh] bg-ink flex flex-col overflow-hidden">
-
-        {/* Geo grid */}
-        <div className="absolute inset-0 geo-grid pointer-events-none" />
-
-        {/* Giant diamond SVG — top right */}
+      {/* ── Masthead compacto ─────────────────────────────── */}
+      <section className="relative bg-ink border-b border-y/15 overflow-hidden geo-grid">
+        {/* Diamond accent — top right */}
         <svg
-          className="absolute -top-24 right-0 w-[80vw] max-w-[820px] opacity-[0.11] pointer-events-none"
-          viewBox="0 0 820 820" fill="none"
+          className="absolute top-0 right-0 w-64 h-64 opacity-[0.07] pointer-events-none"
+          viewBox="0 0 256 256" fill="none"
         >
-          {[40, 100, 160, 220, 280, 340, 400, 460, 520, 580, 640, 700, 760].map((r) => (
+          {[30, 70, 110, 150, 190, 230].map((r) => (
             <rect
               key={r}
-              x={410 - r / Math.SQRT2}
-              y={410 - r / Math.SQRT2}
+              x={128 - r / Math.SQRT2}
+              y={128 - r / Math.SQRT2}
               width={r * Math.SQRT2}
               height={r * Math.SQRT2}
-              transform="rotate(45 410 410)"
+              transform="rotate(45 128 128)"
               stroke="#FFE600"
               strokeWidth="1"
               fill="none"
             />
           ))}
-          <line x1="410" y1="0" x2="410" y2="820" stroke="#FFE600" strokeWidth="0.5" />
-          <line x1="0" y1="410" x2="820" y2="410" stroke="#FFE600" strokeWidth="0.5" />
-          <line x1="0" y1="0" x2="820" y2="820" stroke="#FFE600" strokeWidth="0.3" opacity="0.4" />
-          <line x1="820" y1="0" x2="0" y2="820" stroke="#FFE600" strokeWidth="0.3" opacity="0.4" />
-          <circle cx="410" cy="410" r="5" fill="#FFE600" />
-          <circle cx="410" cy="410" r="18" stroke="#FFE600" strokeWidth="0.8" fill="none" />
-          <circle cx="410" cy="410" r="36" stroke="#FFE600" strokeWidth="0.4" fill="none" />
+          <circle cx="128" cy="128" r="4" fill="#FFE600" />
         </svg>
 
-        {/* Horizontal circuit traces */}
-        <div className="absolute left-0 right-0 top-[32%] h-px bg-gradient-to-r from-transparent via-y/10 to-transparent pointer-events-none" />
-        <div className="absolute left-0 right-0 bottom-[22%] h-px bg-gradient-to-r from-transparent via-y/6 to-transparent pointer-events-none" />
+        <div className="max-w-5xl mx-auto px-6 py-10 relative">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
 
-        {/* Vertical circuit trace — left */}
-        <div className="absolute left-14 inset-y-0 w-px bg-gradient-to-b from-transparent via-y/12 to-transparent pointer-events-none" />
-
-        {/* Circuit nodes */}
-        <span className="absolute left-14 top-[32%] w-2.5 h-2.5 -translate-x-1/2 -translate-y-1/2 border border-y/50 rotate-45 pointer-events-none" />
-        <span className="absolute left-14 bottom-[22%] w-2 h-2 -translate-x-1/2 translate-y-1/2 bg-y/25 rotate-45 pointer-events-none" />
-
-        {/* ─ Content ──────────────────────────────────────── */}
-        <div className="relative flex-1 flex flex-col max-w-5xl mx-auto px-6 w-full pt-14 pb-10">
-
-          {/* Top bar */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="w-1.5 h-1.5 bg-y shrink-0 pulse-dot" />
-              <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-y/60">
-                SYS://NEURAL_DROP
-              </span>
-              <span className="blink text-y text-xs leading-none">▮</span>
-            </div>
-            <div className="hidden sm:flex items-center gap-5">
-              <span className="font-mono text-[9px] tracking-widest uppercase text-white/20">
-                [{posts.length.toString().padStart(3, '0')}] DROPS
-              </span>
-              <span className="w-px h-3 bg-white/10" />
-              <span className="font-mono text-[9px] tracking-widest uppercase text-white/20">
-                DIÁRIO
-              </span>
-            </div>
-          </div>
-
-          {/* Headline */}
-          <div className="flex-1 flex flex-col justify-center pt-12 pb-6">
-
-            <div className="flex items-center gap-4 mb-5">
-              <div className="h-px w-8 bg-y/40 shrink-0" />
-              <span className="font-mono text-[9px] tracking-[0.4em] uppercase text-y/35 whitespace-nowrap overflow-hidden">
-                INTELIGÊNCIA ARTIFICIAL · SEM FILTRO · BRASIL
-              </span>
-            </div>
-
-            <h1 className="font-display uppercase leading-none">
-              <span className="block text-[clamp(5rem,20vw,17rem)] text-white leading-[0.82] tracking-tight glitch-text">
-                NEURAL
-              </span>
-
-              <div className="flex items-center gap-5">
-                <span className="text-[clamp(5rem,20vw,17rem)] text-y leading-[0.82] tracking-tight shrink-0">
-                  DROP
+            <div>
+              <div className="flex items-center gap-2.5 mb-3">
+                <span className="w-1.5 h-1.5 bg-y rotate-45 pulse-dot" />
+                <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-y/55">
+                  SYS://NEURAL_DROP
                 </span>
-                <div className="flex-1 h-px bg-gradient-to-r from-y/50 to-transparent hidden sm:block" />
+                <span className="blink text-y text-xs leading-none">▮</span>
               </div>
-            </h1>
 
-            {/* Description + CTA */}
-            <div className="mt-10 flex flex-col sm:flex-row sm:items-end gap-8">
-              <p className="text-sm text-white/35 max-w-sm leading-relaxed border-l-2 border-y/30 pl-4">
-                As notícias mais quentes de IA — sem filtro corporativo, sem
-                enrolação. Drops diários direto do epicentro da revolução.
+              <p className="text-sm text-white/40 max-w-md leading-relaxed">
+                As notícias mais quentes de IA — sem filtro corporativo, em PT-BR.
+                Três drops por dia, toda manhã.
               </p>
-              <Link
-                href="#drops"
-                className="stripe-hover inline-flex items-center gap-3 bg-y text-ink text-[11px] font-bold tracking-[0.25em] uppercase px-7 py-4 group self-start relative overflow-hidden"
-              >
-                <span className="w-1.5 h-1.5 bg-ink rotate-45 shrink-0 group-hover:rotate-[225deg] transition-transform duration-300" />
-                VER DROPS
-              </Link>
+            </div>
+
+            {/* Stats */}
+            <div className="flex items-center gap-6 shrink-0">
+              <div className="text-center">
+                <div className="font-display text-4xl text-y leading-none">
+                  {posts.length.toString().padStart(2, '0')}
+                </div>
+                <div className="font-mono text-[8px] tracking-widest uppercase text-white/25 mt-1">
+                  drops
+                </div>
+              </div>
+              <div className="w-px h-10 bg-white/10" />
+              <div className="text-center">
+                <div className="font-display text-4xl text-white/30 leading-none">3×</div>
+                <div className="font-mono text-[8px] tracking-widest uppercase text-white/25 mt-1">
+                  por dia
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* ─ Ticker bar ──────────────────────────────────── */}
-        <div className="relative border-t border-y/10 bg-y/[0.03] overflow-hidden">
-          <div className="ticker-track flex items-center py-2.5 whitespace-nowrap select-none">
+        {/* Ticker */}
+        <div className="border-t border-y/10 bg-y/[0.03] overflow-hidden">
+          <div className="ticker-track flex items-center py-2 whitespace-nowrap select-none">
             {[...Array(3)].flatMap((_, rep) =>
               TICKER.map((item, i) => (
                 <span
@@ -143,10 +98,10 @@ export default async function HomePage() {
       </section>
 
       {/* ── Drops ────────────────────────────────────────── */}
-      <section id="drops">
+      <section>
 
         {/* Section label */}
-        <div className="max-w-5xl mx-auto px-6 pt-14 pb-6 flex items-center gap-4">
+        <div className="max-w-5xl mx-auto px-6 pt-10 pb-5 flex items-center gap-4">
           <span className="w-1.5 h-1.5 bg-y rotate-45 shrink-0" />
           <span className="font-mono text-[9px] tracking-[0.35em] uppercase text-ink/30 dark:text-white/30">
             ÚLTIMOS DROPS
@@ -157,32 +112,75 @@ export default async function HomePage() {
           </span>
         </div>
 
-        {/* 2 featured posts — side by side */}
+        {/* 3 featured — 1 large left + 2 stacked right */}
         {featured.length > 0 && (
           <div className="max-w-5xl mx-auto px-6 mb-px">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-ink/8 dark:bg-white/8 border border-ink/8 dark:border-white/8">
-              {featured.map((post, idx) => (
+
+              {/* Card 1 — tall, spans 2 rows */}
+              {featured[0] && (
+                <Link
+                  href={`/posts/${featured[0].slug}`}
+                  className="group relative flex flex-col bg-white dark:bg-ink hover:bg-ink transition-colors duration-500 overflow-hidden stripe-hover sm:row-span-2"
+                >
+                  <span className="absolute top-4 left-4 w-5 h-5 border-t-2 border-l-2 border-ink/10 dark:border-white/10 group-hover:border-y transition-colors duration-300" />
+                  <span className="absolute top-4 right-4 w-5 h-5 border-t-2 border-r-2 border-ink/10 dark:border-white/10 group-hover:border-y transition-colors duration-300" />
+                  <span className="absolute bottom-4 left-4 w-5 h-5 border-b-2 border-l-2 border-ink/10 dark:border-white/10 group-hover:border-y/40 transition-colors duration-300" />
+                  <span className="absolute bottom-4 right-4 w-5 h-5 border-b-2 border-r-2 border-ink/10 dark:border-white/10 group-hover:border-y/40 transition-colors duration-300" />
+
+                  <span className="absolute top-4 right-14 font-mono text-[8px] tracking-[0.3em] uppercase text-ink group-hover:text-y bg-y group-hover:bg-ink border border-transparent group-hover:border-y/30 px-2 py-0.5 transition-colors duration-300">
+                    NOVO
+                  </span>
+
+                  <div className="flex flex-col flex-1 px-7 pt-9 pb-5 gap-5">
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 bg-y rotate-45 shrink-0" />
+                      <span className="text-[9px] font-bold tracking-[0.3em] uppercase text-ink/40 dark:text-white/40 group-hover:text-y transition-colors">
+                        {featured[0].category}
+                      </span>
+                      <span className="flex-1 h-px bg-ink/8 dark:bg-white/8" />
+                      <span className="font-mono text-[9px] text-ink/25 dark:text-white/25">
+                        {featured[0].readTime}
+                      </span>
+                    </div>
+
+                    <h2 className="font-display text-[clamp(2rem,4vw,3.2rem)] text-ink dark:text-white group-hover:text-white uppercase leading-none tracking-tight transition-colors">
+                      {featured[0].title}
+                    </h2>
+
+                    <p className="text-sm text-ink/55 dark:text-white/55 group-hover:text-white/65 leading-relaxed transition-colors">
+                      {featured[0].excerpt}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between px-7 pb-7">
+                    <time className="font-mono text-xs text-ink/25 dark:text-white/25 group-hover:text-white/35 transition-colors">
+                      {formatDate(featured[0].date)}
+                    </time>
+                    <span className="flex items-center gap-1.5 text-ink/30 dark:text-white/30 group-hover:text-y transition-colors font-bold text-sm tracking-wider">
+                      LER <span className="text-base leading-none">→</span>
+                    </span>
+                  </div>
+
+                  <div className="h-px w-0 group-hover:w-full bg-y transition-all duration-500 ease-out" />
+                </Link>
+              )}
+
+              {/* Cards 2 & 3 — stacked */}
+              {featured.slice(1).map((post) => (
                 <Link
                   key={post.slug}
                   href={`/posts/${post.slug}`}
-                  className="group relative flex flex-col bg-white dark:bg-ink hover:bg-ink transition-colors duration-500 overflow-hidden stripe-hover min-h-[320px]"
+                  className="group relative flex flex-col bg-white dark:bg-ink hover:bg-ink transition-colors duration-500 overflow-hidden stripe-hover"
                 >
-                  {/* NEW badge on first */}
-                  {idx === 0 && (
-                    <span className="absolute top-5 right-5 font-mono text-[8px] tracking-[0.3em] uppercase text-ink bg-y px-2 py-0.5 z-10">
-                      NOVO
-                    </span>
-                  )}
+                  <span className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-ink/10 dark:border-white/10 group-hover:border-y transition-colors duration-300" />
+                  <span className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-ink/10 dark:border-white/10 group-hover:border-y transition-colors duration-300" />
+                  <span className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-ink/10 dark:border-white/10 group-hover:border-y/40 transition-colors duration-300" />
+                  <span className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-ink/10 dark:border-white/10 group-hover:border-y/40 transition-colors duration-300" />
 
-                  {/* Corner brackets */}
-                  <span className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-ink/10 dark:border-white/10 group-hover:border-y transition-colors duration-300" />
-                  <span className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-ink/10 dark:border-white/10 group-hover:border-y transition-colors duration-300" />
-                  <span className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-ink/10 dark:border-white/10 group-hover:border-y/40 transition-colors duration-300" />
-                  <span className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-ink/10 dark:border-white/10 group-hover:border-y/40 transition-colors duration-300" />
-
-                  <div className="flex flex-col flex-1 px-7 pt-8 pb-5 gap-4">
+                  <div className="flex flex-col flex-1 px-6 pt-6 pb-4 gap-3">
                     <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-y rotate-45 shrink-0" />
+                      <span className="w-1 h-1 bg-y rotate-45 shrink-0" />
                       <span className="text-[9px] font-bold tracking-[0.3em] uppercase text-ink/40 dark:text-white/40 group-hover:text-y transition-colors">
                         {post.category}
                       </span>
@@ -192,7 +190,7 @@ export default async function HomePage() {
                       </span>
                     </div>
 
-                    <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.8rem)] text-ink dark:text-white group-hover:text-white uppercase leading-none tracking-tight transition-colors flex-1">
+                    <h2 className="font-display text-[clamp(1.4rem,2.5vw,2rem)] text-ink dark:text-white group-hover:text-white uppercase leading-tight tracking-tight transition-colors">
                       {post.title}
                     </h2>
 
@@ -201,7 +199,7 @@ export default async function HomePage() {
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between px-7 pb-7">
+                  <div className="flex items-center justify-between px-6 pb-5">
                     <time className="font-mono text-xs text-ink/25 dark:text-white/25 group-hover:text-white/35 transition-colors">
                       {formatDate(post.date)}
                     </time>
@@ -210,7 +208,6 @@ export default async function HomePage() {
                     </span>
                   </div>
 
-                  {/* Bottom sweep line */}
                   <div className="h-px w-0 group-hover:w-full bg-y transition-all duration-500 ease-out" />
                 </Link>
               ))}
@@ -220,13 +217,21 @@ export default async function HomePage() {
 
         {/* Older posts grid */}
         {older.length > 0 && (
-          <div className="max-w-5xl mx-auto px-6 pb-24">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-ink/8 dark:bg-white/8 border border-ink/8 dark:border-white/8 border-t-0">
-              {older.map((post) => (
-                <ArticleCard key={post.slug} post={post} />
-              ))}
+          <>
+            <div className="max-w-5xl mx-auto px-6 pt-8 pb-4 flex items-center gap-4">
+              <span className="font-mono text-[9px] tracking-[0.35em] uppercase text-ink/20 dark:text-white/20">
+                ARQUIVO
+              </span>
+              <div className="flex-1 h-px bg-ink/8 dark:bg-white/8" />
             </div>
-          </div>
+            <div className="max-w-5xl mx-auto px-6 pb-24">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-ink/8 dark:bg-white/8 border border-ink/8 dark:border-white/8">
+                {older.map((post) => (
+                  <ArticleCard key={post.slug} post={post} />
+                ))}
+              </div>
+            </div>
+          </>
         )}
 
         {posts.length === 0 && (
