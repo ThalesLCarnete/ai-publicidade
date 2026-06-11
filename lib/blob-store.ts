@@ -40,6 +40,7 @@ async function writeDB(posts: PostWithContent[]) {
   await put(BLOB_KEY, JSON.stringify(posts, null, 2), {
     access: 'private',
     addRandomSuffix: false,
+    allowOverwrite: true,
     contentType: 'application/json',
   })
 }
