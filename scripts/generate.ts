@@ -1,7 +1,9 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { put } from '@vercel/blob'
 import type { RSSArticle } from './rss'
 
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY
+const POLLINATIONS_KEY = process.env.POLLINATIONS_API_KEY
 
 const anthropic = ANTHROPIC_KEY ? new Anthropic({ apiKey: ANTHROPIC_KEY }) : null
 
@@ -31,7 +33,7 @@ async function chatComplete(opts: {
     return res.content[0].type === 'text' ? res.content[0].text : ''
   }
 
-  // Fallback: Pollinations OpenAI-compatible API (sem sk_)
+  // Fallback: Pollinations OpenAI-compatible API
   const res = await fetch('https://text.pollinations.ai/openai', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -49,18 +51,50 @@ async function chatComplete(opts: {
   return data.choices?.[0]?.message?.content ?? ''
 }
 
-// URL direta Pollinations — modelo mais barato, sem chave, sem upload
-function imageUrl(prompt: string, seed: number, width = 1200, height = 630): string {
-  const style = 'dark background, minimal geometric, professional ad-tech, no text, no watermark'
-  const encoded = encodeURIComponent(`${prompt}, ${style}`)
-  return `https://image.pollinations.ai/prompt/${encoded}?model=flux-schnell&width=${width}&height=${height}&seed=${seed}&nologo=true`
-}
-
-// Seed determinístico simples para que a mesma notícia gere a mesma imagem
+// Seed determinístico por string — mesma notícia = mesma imagem
 function seedFrom(s: string): number {
   let h = 0
   for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0
   return Math.abs(h) % 1_000_000
+}
+
+// Gera imagem via gen.pollinations.ai (sk_ server-side) e faz upload para Vercel Blob
+// A URL final no MDX é pública e não contém nenhuma chave
+async function generateAndUploadImage(
+  prompt: string,
+  seed: number,
+  width = 1200,
+  height = 630
+): Promise<string> {
+  const style = 'dark background, minimal geometric shapes, professional advertising technology, no text'
+  const encoded = encodeURIComponent(`${prompt}, ${style}`)
+  const genUrl = `https://gen.pollinations.ai/image/${encoded}?model=zimage&width=${width}&height=${height}&seed=${seed}&nologo=true`
+
+  if (!POLLINATIONS_KEY) {
+    console.log('    ⚠ POLLINATIONS_API_KEY não definida, pulando imagem')
+    return ''
+  }
+
+  try {
+    const imgRes = await fetch(genUrl, {
+      headers: { Authorization: `Bearer ${POLLINATIONS_KEY}` },
+      signal: AbortSignal.timeout(60_000),
+    })
+    if (!imgRes.ok) throw new Error(`Pollinations ${imgRes.status}`)
+    const imgBytes = await imgRes.arrayBuffer()
+
+    const blobKey = `ai-publicidade/images/${seed}-${width}x${height}.jpg`
+    const result = await put(blobKey, imgBytes, {
+      access: 'public',
+      contentType: 'image/jpeg',
+      addRandomSuffix: false,
+      allowOverwrite: true,
+    })
+    return result.url
+  } catch (err) {
+    console.error('    ✗ Erro ao gerar imagem:', (err as Error).message)
+    return ''
+  }
 }
 
 const SYSTEM_SCORE = `Você é um avaliador de notícias para um blog de IA e publicidade no Brasil.`
@@ -109,11 +143,16 @@ export async function scoreArticles(
 
 export async function generatePost(article: RSSArticle): Promise<GeneratedPost> {
   const base = seedFrom(article.link)
-  const coverUrl = imageUrl(`${article.title} AI marketing concept`, base)
-  const img2Url = imageUrl('AI data visualization advertising dashboard futuristic', base + 1)
-  const img3Url = imageUrl('creative technology artificial intelligence digital agency', base + 2)
 
-  console.log('  ↳ URLs de imagem Pollinations (flux-schnell) geradas')
+  console.log('  ↳ Gerando imagens (zimage → Vercel Blob)...')
+  const [coverUrl, img2Url, img3Url] = await Promise.all([
+    generateAndUploadImage(`${article.title} AI marketing concept`, base),
+    generateAndUploadImage('AI data visualization advertising dashboard futuristic', base + 1),
+    generateAndUploadImage('creative technology artificial intelligence digital agency', base + 2),
+  ])
+
+  const imgBlock = (url: string, alt: string) =>
+    url ? `![${alt}](${url})` : ''
 
   const text = await chatComplete({
     model: { anthropic: 'claude-sonnet-4-6', pollinations: 'openai' },
@@ -124,17 +163,12 @@ TÍTULO: ${article.title}
 DESCRIÇÃO: ${article.description}
 FONTE: ${article.link}
 
-Use estas URLs de imagem EXATAMENTE como estão:
-
-IMAGEM DE CAPA: ${coverUrl}
-IMAGEM 2 (seção do meio): ${img2Url}
-IMAGEM 3 (seção final): ${img3Url}
+${coverUrl ? `Use estas URLs de imagem EXATAMENTE como estão:\n\nIMAGEM DE CAPA: ${coverUrl}\nIMAGEM 2 (seção do meio): ${img2Url}\nIMAGEM 3 (seção final): ${img3Url}\n` : '(Não inclua imagens neste artigo)'}
 
 Estrutura:
-1. ![descrição em português](${coverUrl})
-2. Introdução contextualizando para o mercado BR
-3. 3-4 seções com ## incluindo img2 no meio
-4. ## O que isso muda para você — use img3
+${coverUrl ? `1. ${imgBlock(coverUrl, 'capa')}\n` : ''}2. Introdução contextualizando para o mercado BR
+3. 3-4 seções com ## ${img2Url ? 'incluindo img2 no meio' : ''}
+4. ## O que isso muda para você${img3Url ? ` — use ${imgBlock(img3Url, 'imagem final')}` : ''}
 5. Conclusão prática`,
     maxTokens: 4096,
   })
