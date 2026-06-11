@@ -1,9 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { put } from '@vercel/blob'
 import type { RSSArticle } from './rss'
 
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY
-const HF_TOKEN = process.env.HUGGINGFACE_TOKEN
+const BLOG_URL = process.env.BLOG_URL ?? 'https://ai-publicidade.vercel.app'
 
 const anthropic = ANTHROPIC_KEY ? new Anthropic({ apiKey: ANTHROPIC_KEY }) : null
 
@@ -58,60 +57,10 @@ function seedFrom(s: string): number {
   return Math.abs(h) % 1_000_000
 }
 
-// Gera imagem via HuggingFace (FLUX.1-schnell) e faz upload para Vercel Blob
-// URL final no MDX é pública e permanente, sem chave exposta
-async function generateAndUploadImage(
-  prompt: string,
-  seed: number,
-  width = 1024,
-  height = 576
-): Promise<string> {
-  if (!HF_TOKEN) {
-    console.log('    ⚠ HUGGINGFACE_TOKEN não definida, pulando imagem')
-    return ''
-  }
-
-  const style = 'dark background, minimal geometric shapes, professional advertising technology, no text, no watermark, cinematic lighting'
-  const fullPrompt = `${prompt}, ${style}`
-
-  try {
-    const res = await fetch(
-      'https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell',
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${HF_TOKEN}`,
-          'Content-Type': 'application/json',
-          'x-use-cache': 'false',
-        },
-        body: JSON.stringify({
-          inputs: fullPrompt,
-          parameters: { width, height, num_inference_steps: 4, seed },
-        }),
-        signal: AbortSignal.timeout(120_000),
-      }
-    )
-
-    if (!res.ok) {
-      const err = await res.text()
-      throw new Error(`HuggingFace ${res.status}: ${err.slice(0, 200)}`)
-    }
-
-    const imgBytes = await res.arrayBuffer()
-    if (imgBytes.byteLength < 1000) throw new Error('Imagem vazia retornada')
-
-    const blobKey = `ai-publicidade/images/${seed}-${width}x${height}.jpg`
-    const result = await put(blobKey, imgBytes, {
-      access: 'public',
-      contentType: 'image/jpeg',
-      addRandomSuffix: false,
-      allowOverwrite: true,
-    })
-    return result.url
-  } catch (err) {
-    console.error('    ✗ Erro ao gerar imagem:', (err as Error).message)
-    return ''
-  }
+// URLs de imagem servidas pelo route handler /api/image do próprio blog
+// Gera no HuggingFace on-demand e faz cache no Blob privado — sem chave exposta
+function imageUrl(seed: number, type: 'cover' | 'mid' | 'end'): string {
+  return `${BLOG_URL}/api/image?seed=${seed}&type=${type}&w=1200&h=630`
 }
 
 const SYSTEM_SCORE = `Você é um avaliador de notícias para um blog de IA e publicidade no Brasil.`
@@ -160,13 +109,11 @@ export async function scoreArticles(
 
 export async function generatePost(article: RSSArticle): Promise<GeneratedPost> {
   const base = seedFrom(article.link)
+  const coverUrl = imageUrl(base, 'cover')
+  const img2Url = imageUrl(base + 1, 'mid')
+  const img3Url = imageUrl(base + 2, 'end')
 
-  console.log('  ↳ Gerando imagens (FLUX.1-schnell → Vercel Blob)...')
-  const [coverUrl, img2Url, img3Url] = await Promise.all([
-    generateAndUploadImage(`${article.title} AI marketing technology concept`, base, 1200, 630),
-    generateAndUploadImage('AI data visualization advertising dashboard futuristic technology', base + 1, 1200, 630),
-    generateAndUploadImage('creative technology artificial intelligence digital agency innovation', base + 2, 1200, 630),
-  ])
+  console.log(`  ↳ URLs de imagem geradas (seed: ${base})`)
 
   const text = await chatComplete({
     model: { anthropic: 'claude-sonnet-4-6', pollinations: 'openai' },
@@ -177,16 +124,17 @@ TÍTULO: ${article.title}
 DESCRIÇÃO: ${article.description}
 FONTE: ${article.link}
 
-${coverUrl ? `Use estas URLs de imagem EXATAMENTE como estão (não modifique):
+Use estas URLs de imagem EXATAMENTE como estão (não modifique):
 
 IMAGEM DE CAPA: ${coverUrl}
 IMAGEM 2 (seção do meio): ${img2Url}
 IMAGEM 3 (seção final): ${img3Url}
 
-` : ''}Estrutura:
-${coverUrl ? `1. ![imagem de capa](${coverUrl})\n` : ''}2. Introdução contextualizando para o mercado BR
-3. 3-4 seções com ## ${img2Url ? `— inclua ![imagem](${img2Url}) em uma seção do meio` : ''}
-4. ## O que isso muda para você${img3Url ? ` — inclua ![imagem](${img3Url})` : ''}
+Estrutura:
+1. ![imagem de capa](${coverUrl})
+2. Introdução contextualizando para o mercado BR
+3. 3-4 seções com ## — inclua ![imagem](${img2Url}) em uma seção do meio
+4. ## O que isso muda para você — inclua ![imagem](${img3Url})
 5. Conclusão prática`,
     maxTokens: 4096,
   })
