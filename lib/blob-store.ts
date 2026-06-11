@@ -18,7 +18,7 @@ async function readDB(): Promise<PostWithContent[]> {
   try {
     const url = await findBlobUrl()
     if (!url) return []
-    const result = await get(url, { access: 'private' })
+    const result = await get(url, { access: 'private', useCache: false })
     if (!result || result.statusCode === 304) return []
     const chunks: Uint8Array[] = []
     const reader = result.stream.getReader()
