@@ -24,7 +24,6 @@ jobs:
       - name: Gerar e publicar posts com imagens
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          POLLINATIONS_API_KEY: ${{ secrets.POLLINATIONS_API_KEY }}
           BLOG_URL: ${{ secrets.BLOG_URL }}
           BLOG_ADMIN_EMAIL: ${{ secrets.BLOG_ADMIN_EMAIL }}
           BLOG_ADMIN_PASSWORD: ${{ secrets.BLOG_ADMIN_PASSWORD }}
