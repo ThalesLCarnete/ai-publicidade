@@ -3,7 +3,7 @@ import { put } from '@vercel/blob'
 import type { RSSArticle } from './rss'
 
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY
-const POLLINATIONS_KEY = process.env.POLLINATIONS_API_KEY
+const HF_TOKEN = process.env.HUGGINGFACE_TOKEN
 
 const anthropic = ANTHROPIC_KEY ? new Anthropic({ apiKey: ANTHROPIC_KEY }) : null
 
@@ -58,30 +58,47 @@ function seedFrom(s: string): number {
   return Math.abs(h) % 1_000_000
 }
 
-// Gera imagem via gen.pollinations.ai (sk_ server-side) e faz upload para Vercel Blob
-// A URL final no MDX é pública e não contém nenhuma chave
+// Gera imagem via HuggingFace (FLUX.1-schnell) e faz upload para Vercel Blob
+// URL final no MDX é pública e permanente, sem chave exposta
 async function generateAndUploadImage(
   prompt: string,
   seed: number,
-  width = 1200,
-  height = 630
+  width = 1024,
+  height = 576
 ): Promise<string> {
-  const style = 'dark background, minimal geometric shapes, professional advertising technology, no text'
-  const encoded = encodeURIComponent(`${prompt}, ${style}`)
-  const genUrl = `https://gen.pollinations.ai/image/${encoded}?model=zimage&width=${width}&height=${height}&seed=${seed}&nologo=true`
-
-  if (!POLLINATIONS_KEY) {
-    console.log('    ⚠ POLLINATIONS_API_KEY não definida, pulando imagem')
+  if (!HF_TOKEN) {
+    console.log('    ⚠ HUGGINGFACE_TOKEN não definida, pulando imagem')
     return ''
   }
 
+  const style = 'dark background, minimal geometric shapes, professional advertising technology, no text, no watermark, cinematic lighting'
+  const fullPrompt = `${prompt}, ${style}`
+
   try {
-    const imgRes = await fetch(genUrl, {
-      headers: { Authorization: `Bearer ${POLLINATIONS_KEY}` },
-      signal: AbortSignal.timeout(60_000),
-    })
-    if (!imgRes.ok) throw new Error(`Pollinations ${imgRes.status}`)
-    const imgBytes = await imgRes.arrayBuffer()
+    const res = await fetch(
+      'https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${HF_TOKEN}`,
+          'Content-Type': 'application/json',
+          'x-use-cache': 'false',
+        },
+        body: JSON.stringify({
+          inputs: fullPrompt,
+          parameters: { width, height, num_inference_steps: 4, seed },
+        }),
+        signal: AbortSignal.timeout(120_000),
+      }
+    )
+
+    if (!res.ok) {
+      const err = await res.text()
+      throw new Error(`HuggingFace ${res.status}: ${err.slice(0, 200)}`)
+    }
+
+    const imgBytes = await res.arrayBuffer()
+    if (imgBytes.byteLength < 1000) throw new Error('Imagem vazia retornada')
 
     const blobKey = `ai-publicidade/images/${seed}-${width}x${height}.jpg`
     const result = await put(blobKey, imgBytes, {
@@ -144,15 +161,12 @@ export async function scoreArticles(
 export async function generatePost(article: RSSArticle): Promise<GeneratedPost> {
   const base = seedFrom(article.link)
 
-  console.log('  ↳ Gerando imagens (zimage → Vercel Blob)...')
+  console.log('  ↳ Gerando imagens (FLUX.1-schnell → Vercel Blob)...')
   const [coverUrl, img2Url, img3Url] = await Promise.all([
-    generateAndUploadImage(`${article.title} AI marketing concept`, base),
-    generateAndUploadImage('AI data visualization advertising dashboard futuristic', base + 1),
-    generateAndUploadImage('creative technology artificial intelligence digital agency', base + 2),
+    generateAndUploadImage(`${article.title} AI marketing technology concept`, base, 1200, 630),
+    generateAndUploadImage('AI data visualization advertising dashboard futuristic technology', base + 1, 1200, 630),
+    generateAndUploadImage('creative technology artificial intelligence digital agency innovation', base + 2, 1200, 630),
   ])
-
-  const imgBlock = (url: string, alt: string) =>
-    url ? `![${alt}](${url})` : ''
 
   const text = await chatComplete({
     model: { anthropic: 'claude-sonnet-4-6', pollinations: 'openai' },
@@ -163,12 +177,16 @@ TÍTULO: ${article.title}
 DESCRIÇÃO: ${article.description}
 FONTE: ${article.link}
 
-${coverUrl ? `Use estas URLs de imagem EXATAMENTE como estão:\n\nIMAGEM DE CAPA: ${coverUrl}\nIMAGEM 2 (seção do meio): ${img2Url}\nIMAGEM 3 (seção final): ${img3Url}\n` : '(Não inclua imagens neste artigo)'}
+${coverUrl ? `Use estas URLs de imagem EXATAMENTE como estão (não modifique):
 
-Estrutura:
-${coverUrl ? `1. ${imgBlock(coverUrl, 'capa')}\n` : ''}2. Introdução contextualizando para o mercado BR
-3. 3-4 seções com ## ${img2Url ? 'incluindo img2 no meio' : ''}
-4. ## O que isso muda para você${img3Url ? ` — use ${imgBlock(img3Url, 'imagem final')}` : ''}
+IMAGEM DE CAPA: ${coverUrl}
+IMAGEM 2 (seção do meio): ${img2Url}
+IMAGEM 3 (seção final): ${img3Url}
+
+` : ''}Estrutura:
+${coverUrl ? `1. ![imagem de capa](${coverUrl})\n` : ''}2. Introdução contextualizando para o mercado BR
+3. 3-4 seções com ## ${img2Url ? `— inclua ![imagem](${img2Url}) em uma seção do meio` : ''}
+4. ## O que isso muda para você${img3Url ? ` — inclua ![imagem](${img3Url})` : ''}
 5. Conclusão prática`,
     maxTokens: 4096,
   })
