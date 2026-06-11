@@ -7,9 +7,9 @@ const bebas = Bebas_Neue({ weight: '400', subsets: ['latin'], variable: '--font-
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
 
 export const metadata: Metadata = {
-  title: 'IA & Publicidade — TBWA',
+  title: 'Neural Drop — IA que importa',
   description:
-    'As ferramentas e tendências de inteligência artificial mais relevantes para o mercado publicitário.',
+    'As notícias mais quentes de inteligência artificial — sem filtro corporativo, em PT-BR.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

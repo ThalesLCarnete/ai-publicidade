@@ -2,7 +2,7 @@ import { fetchAllFeeds } from './rss'
 import { scoreArticles, generatePost } from './generate'
 import { publishPost } from './publish'
 
-const MAX_PER_RUN = 2
+const MAX_PER_RUN = 3
 const MIN_SCORE = 7
 
 async function loadPublishedSlugs(): Promise<Set<string>> {

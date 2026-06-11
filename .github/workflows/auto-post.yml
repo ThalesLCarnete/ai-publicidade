@@ -2,8 +2,8 @@ name: Auto Post
 
 on:
   schedule:
-    # Seg, Qua, Sex às 12:00 UTC = 09:00 horário de Brasília
-    - cron: '0 12 * * 1,3,5'
+    # Todo dia às 12:00 UTC = 09:00 horário de Brasília
+    - cron: '0 12 * * *'
   workflow_dispatch: # permite rodar manualmente pela interface do GitHub
 
 jobs:

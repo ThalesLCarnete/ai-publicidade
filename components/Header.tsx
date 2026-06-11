@@ -12,7 +12,7 @@ export function Header() {
             <span className="text-y font-bold text-sm leading-none select-none z-10">\</span>
           </span>
           <span className="font-display text-white text-lg tracking-widest uppercase group-hover:text-y transition-colors">
-            IA & Publicidade
+            Neural Drop
           </span>
         </Link>
 

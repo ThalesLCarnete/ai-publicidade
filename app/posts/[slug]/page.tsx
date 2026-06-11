@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params
   const post = await getPostBySlug(slug)
   if (!post) return {}
-  return { title: `${post.title} — TBWA \\ IA & Publicidade`, description: post.excerpt }
+  return { title: `${post.title} — Neural Drop`, description: post.excerpt }
 }
 
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {

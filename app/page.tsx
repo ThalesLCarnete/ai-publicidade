@@ -5,15 +5,15 @@ import { ArticleCard } from '@/components/ArticleCard'
 export const dynamic = 'force-dynamic'
 
 const TICKER = [
-  'GENERATIVE AI', 'PERFORMANCE MAX', 'CLAUDE OPUS', 'META AI',
-  'GPT-5', 'FLUX.1-SCHNELL', 'BRAND SAFETY', 'COOKIELESS',
-  'PROGRAMÁTICO', 'LLAMA 3', 'MIDJOURNEY', 'SORA',
-  'GEMINI 2.5', 'REAL-TIME BIDDING', 'DALL·E 3', 'RAG', 'AGENTIC AI',
+  'GPT-5', 'GEMINI 2.5 PRO', 'CLAUDE OPUS', 'FLUX.1-SCHNELL', 'LLAMA 3',
+  'SORA 2', 'GROK 3', 'MISTRAL LARGE', 'DALL·E 4', 'DEEPSEEK R2',
+  'AGENTIC AI', 'RAG 2.0', 'MCP PROTOCOL', 'REASONING MODELS', 'DIFFUSION VIDEO',
 ]
 
 export default async function HomePage() {
   const posts = await getPosts()
-  const [hero, ...rest] = posts
+  const featured = posts.slice(0, 2)
+  const older = posts.slice(2)
 
   return (
     <>
@@ -69,17 +69,17 @@ export default async function HomePage() {
             <div className="flex items-center gap-3">
               <span className="w-1.5 h-1.5 bg-y shrink-0 pulse-dot" />
               <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-y/60">
-                SYS://IA_PUBLICIDADE
+                SYS://NEURAL_DROP
               </span>
               <span className="blink text-y text-xs leading-none">▮</span>
             </div>
             <div className="hidden sm:flex items-center gap-5">
               <span className="font-mono text-[9px] tracking-widest uppercase text-white/20">
-                [{posts.length.toString().padStart(3, '0')}] ARTIGOS
+                [{posts.length.toString().padStart(3, '0')}] DROPS
               </span>
               <span className="w-px h-3 bg-white/10" />
               <span className="font-mono text-[9px] tracking-widest uppercase text-white/20">
-                3×/SEM
+                DIÁRIO
               </span>
             </div>
           </div>
@@ -90,40 +90,35 @@ export default async function HomePage() {
             <div className="flex items-center gap-4 mb-5">
               <div className="h-px w-8 bg-y/40 shrink-0" />
               <span className="font-mono text-[9px] tracking-[0.4em] uppercase text-y/35 whitespace-nowrap overflow-hidden">
-                INTELIGÊNCIA ARTIFICIAL · PUBLICIDADE · BRASIL
+                INTELIGÊNCIA ARTIFICIAL · SEM FILTRO · BRASIL
               </span>
             </div>
 
-            {/* IA — massive */}
             <h1 className="font-display uppercase leading-none">
-              <span className="block text-[clamp(8rem,28vw,22rem)] text-white leading-[0.82] tracking-tight glitch-text">
-                IA
+              <span className="block text-[clamp(5rem,20vw,17rem)] text-white leading-[0.82] tracking-tight glitch-text">
+                NEURAL
               </span>
 
-              <div className="flex items-center gap-5 -mt-1">
-                <span className="text-[clamp(2.5rem,9vw,7rem)] text-y leading-none tracking-tight shrink-0">
-                  PARA
+              <div className="flex items-center gap-5">
+                <span className="text-[clamp(5rem,20vw,17rem)] text-y leading-[0.82] tracking-tight shrink-0">
+                  DROP
                 </span>
-                <div className="flex-1 h-px bg-gradient-to-r from-y/50 to-transparent" />
+                <div className="flex-1 h-px bg-gradient-to-r from-y/50 to-transparent hidden sm:block" />
               </div>
-
-              <span className="block text-[clamp(1.8rem,5.5vw,4.8rem)] text-white/25 leading-none tracking-tight mt-1">
-                PUBLICIDADE
-              </span>
             </h1>
 
             {/* Description + CTA */}
-            <div className="mt-12 flex flex-col sm:flex-row sm:items-end gap-8">
+            <div className="mt-10 flex flex-col sm:flex-row sm:items-end gap-8">
               <p className="text-sm text-white/35 max-w-sm leading-relaxed border-l-2 border-y/30 pl-4">
-                As ferramentas, tendências e estratégias de IA que estão reescrevendo
-                as regras do mercado publicitário — em PT-BR, sem enrolação.
+                As notícias mais quentes de IA — sem filtro corporativo, sem
+                enrolação. Drops diários direto do epicentro da revolução.
               </p>
               <Link
-                href="#artigos"
+                href="#drops"
                 className="stripe-hover inline-flex items-center gap-3 bg-y text-ink text-[11px] font-bold tracking-[0.25em] uppercase px-7 py-4 group self-start relative overflow-hidden"
               >
                 <span className="w-1.5 h-1.5 bg-ink rotate-45 shrink-0 group-hover:rotate-[225deg] transition-transform duration-300" />
-                VER ARTIGOS
+                VER DROPS
               </Link>
             </div>
           </div>
@@ -147,14 +142,14 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Articles ─────────────────────────────────────── */}
-      <section id="artigos">
+      {/* ── Drops ────────────────────────────────────────── */}
+      <section id="drops">
 
         {/* Section label */}
         <div className="max-w-5xl mx-auto px-6 pt-14 pb-6 flex items-center gap-4">
           <span className="w-1.5 h-1.5 bg-y rotate-45 shrink-0" />
           <span className="font-mono text-[9px] tracking-[0.35em] uppercase text-ink/30 dark:text-white/30">
-            ÚLTIMAS PUBLICAÇÕES
+            ÚLTIMOS DROPS
           </span>
           <div className="flex-1 h-px bg-ink/8 dark:bg-white/8" />
           <span className="font-mono text-[9px] tracking-widest text-ink/20 dark:text-white/20">
@@ -162,63 +157,72 @@ export default async function HomePage() {
           </span>
         </div>
 
-        {/* Featured post — full width */}
-        {hero && (
+        {/* 2 featured posts — side by side */}
+        {featured.length > 0 && (
           <div className="max-w-5xl mx-auto px-6 mb-px">
-            <Link
-              href={`/posts/${hero.slug}`}
-              className="group relative block bg-white dark:bg-ink border border-ink/8 dark:border-white/8 hover:border-y/40 transition-colors duration-500 overflow-hidden stripe-hover"
-            >
-              {/* Corner brackets */}
-              <span className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-ink/10 dark:border-white/10 group-hover:border-y transition-colors duration-300" />
-              <span className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-ink/10 dark:border-white/10 group-hover:border-y transition-colors duration-300" />
-              <span className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-ink/10 dark:border-white/10 group-hover:border-y/40 transition-colors duration-300" />
-              <span className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-ink/10 dark:border-white/10 group-hover:border-y/40 transition-colors duration-300" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-ink/8 dark:bg-white/8 border border-ink/8 dark:border-white/8">
+              {featured.map((post, idx) => (
+                <Link
+                  key={post.slug}
+                  href={`/posts/${post.slug}`}
+                  className="group relative flex flex-col bg-white dark:bg-ink hover:bg-ink transition-colors duration-500 overflow-hidden stripe-hover min-h-[320px]"
+                >
+                  {/* NEW badge on first */}
+                  {idx === 0 && (
+                    <span className="absolute top-5 right-5 font-mono text-[8px] tracking-[0.3em] uppercase text-ink bg-y px-2 py-0.5 z-10">
+                      NOVO
+                    </span>
+                  )}
 
-              <div className="px-8 pt-9 pb-4">
-                <div className="flex flex-wrap items-center gap-3 mb-6">
-                  <span className="w-1.5 h-1.5 bg-y rotate-45 shrink-0" />
-                  <span className="text-[9px] font-bold tracking-[0.3em] uppercase text-ink/40 dark:text-white/40 group-hover:text-y transition-colors">
-                    {hero.category}
-                  </span>
-                  <span className="font-mono text-[9px] text-ink/25 dark:text-white/25">
-                    {hero.readTime}
-                  </span>
-                  <span className="font-mono text-[9px] text-y/70 tracking-widest border border-y/30 px-2 py-0.5">
-                    DESTAQUE
-                  </span>
-                </div>
+                  {/* Corner brackets */}
+                  <span className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-ink/10 dark:border-white/10 group-hover:border-y transition-colors duration-300" />
+                  <span className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-ink/10 dark:border-white/10 group-hover:border-y transition-colors duration-300" />
+                  <span className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-ink/10 dark:border-white/10 group-hover:border-y/40 transition-colors duration-300" />
+                  <span className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-ink/10 dark:border-white/10 group-hover:border-y/40 transition-colors duration-300" />
 
-                <h2 className="font-display text-[clamp(2.2rem,5.5vw,4.5rem)] text-ink dark:text-white group-hover:text-ink uppercase leading-[0.95] tracking-tight transition-colors max-w-3xl">
-                  {hero.title}
-                </h2>
-              </div>
+                  <div className="flex flex-col flex-1 px-7 pt-8 pb-5 gap-4">
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 bg-y rotate-45 shrink-0" />
+                      <span className="text-[9px] font-bold tracking-[0.3em] uppercase text-ink/40 dark:text-white/40 group-hover:text-y transition-colors">
+                        {post.category}
+                      </span>
+                      <span className="flex-1 h-px bg-ink/8 dark:bg-white/8" />
+                      <span className="font-mono text-[9px] text-ink/25 dark:text-white/25">
+                        {post.readTime}
+                      </span>
+                    </div>
 
-              <div className="px-8 pb-9 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
-                <p className="text-sm text-ink/50 dark:text-white/50 group-hover:text-ink/70 dark:group-hover:text-white/65 leading-relaxed max-w-xl transition-colors">
-                  {hero.excerpt}
-                </p>
-                <div className="flex items-center gap-5 shrink-0">
-                  <time className="font-mono text-xs text-ink/25 dark:text-white/25 group-hover:text-ink/40 transition-colors">
-                    {formatDate(hero.date)}
-                  </time>
-                  <span className="flex items-center gap-2 text-ink/30 dark:text-white/30 group-hover:text-y transition-colors font-bold text-sm tracking-wider">
-                    LER <span className="text-lg leading-none">→</span>
-                  </span>
-                </div>
-              </div>
+                    <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.8rem)] text-ink dark:text-white group-hover:text-white uppercase leading-none tracking-tight transition-colors flex-1">
+                      {post.title}
+                    </h2>
 
-              {/* Bottom sweep line */}
-              <div className="h-0.5 w-0 group-hover:w-full bg-y transition-all duration-700 ease-out" />
-            </Link>
+                    <p className="text-sm text-ink/50 dark:text-white/50 group-hover:text-white/65 leading-relaxed line-clamp-2 transition-colors">
+                      {post.excerpt}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between px-7 pb-7">
+                    <time className="font-mono text-xs text-ink/25 dark:text-white/25 group-hover:text-white/35 transition-colors">
+                      {formatDate(post.date)}
+                    </time>
+                    <span className="flex items-center gap-1.5 text-ink/30 dark:text-white/30 group-hover:text-y transition-colors font-bold text-sm tracking-wider">
+                      LER <span className="text-base leading-none">→</span>
+                    </span>
+                  </div>
+
+                  {/* Bottom sweep line */}
+                  <div className="h-px w-0 group-hover:w-full bg-y transition-all duration-500 ease-out" />
+                </Link>
+              ))}
+            </div>
           </div>
         )}
 
-        {/* Grid */}
-        {rest.length > 0 && (
+        {/* Older posts grid */}
+        {older.length > 0 && (
           <div className="max-w-5xl mx-auto px-6 pb-24">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-ink/8 dark:bg-white/8 border border-ink/8 dark:border-white/8 mt-px">
-              {rest.map((post) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-ink/8 dark:bg-white/8 border border-ink/8 dark:border-white/8 border-t-0">
+              {older.map((post) => (
                 <ArticleCard key={post.slug} post={post} />
               ))}
             </div>
@@ -228,7 +232,7 @@ export default async function HomePage() {
         {posts.length === 0 && (
           <div className="max-w-5xl mx-auto px-6 py-24 text-center">
             <span className="font-mono text-sm text-ink/25 dark:text-white/25 tracking-widest">
-              AGUARDANDO TRANSMISSÃO<span className="blink">▮</span>
+              AGUARDANDO PRÓXIMO DROP<span className="blink">▮</span>
             </span>
           </div>
         )}
