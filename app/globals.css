@@ -56,3 +56,31 @@
   50%       { opacity: 0; }
 }
 .blink { animation: blink 1s step-end infinite; }
+
+/* ─── Scrolling news ticker ──────────────────────────────── */
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-33.333%); }
+}
+.ticker-track {
+  animation: ticker 30s linear infinite;
+  will-change: transform;
+}
+.ticker-track:hover { animation-play-state: paused; }
+
+/* ─── Occasional glitch on hero text ────────────────────── */
+@keyframes glitch {
+  0%, 88%, 100% { transform: none; filter: none; }
+  89% { transform: translate(-5px, 0) skewX(-4deg); filter: brightness(1.4); }
+  90% { transform: translate(5px, 0) skewX(4deg); filter: brightness(0.7) hue-rotate(30deg); }
+  91% { transform: translate(-2px, 1px); filter: none; }
+  92% { transform: none; }
+}
+.glitch-text { animation: glitch 9s infinite; }
+
+/* ─── Pulsing circuit node ───────────────────────────────── */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.35; transform: scale(1) rotate(45deg); }
+  50%       { opacity: 1;    transform: scale(1.7) rotate(45deg); }
+}
+.pulse-dot { animation: pulse-dot 2.5s ease-in-out infinite; }
