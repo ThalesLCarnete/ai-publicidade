@@ -51,5 +51,21 @@ export function useMDXComponents(): MDXComponents {
         <div className="flex-1 h-px bg-ink/10 dark:bg-white/10" />
       </div>
     ),
+    img: ({ src, alt }) => (
+      <figure className="my-8 -mx-2">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={src}
+          alt={alt ?? ''}
+          className="w-full object-cover border border-ink/10 dark:border-white/10"
+          loading="lazy"
+        />
+        {alt && (
+          <figcaption className="mt-2 text-xs text-ink/40 dark:text-white/40 text-center tracking-wide">
+            {alt}
+          </figcaption>
+        )}
+      </figure>
+    ),
   }
 }
