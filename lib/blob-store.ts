@@ -15,19 +15,25 @@ async function findBlobUrl(): Promise<string | null> {
 }
 
 async function readDB(): Promise<PostWithContent[]> {
-  const url = await findBlobUrl()
-  if (!url) return []
-  const result = await get(url, { access: 'private' })
-  if (!result || result.statusCode === 304) return []
-  const chunks: Uint8Array[] = []
-  const reader = result.stream.getReader()
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-    if (value) chunks.push(value)
+  try {
+    const url = await findBlobUrl()
+    if (!url) return []
+    const result = await get(url, { access: 'private' })
+    if (!result || result.statusCode === 304) return []
+    const chunks: Uint8Array[] = []
+    const reader = result.stream.getReader()
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      if (value) chunks.push(value)
+    }
+    const text = Buffer.concat(chunks.map((c) => Buffer.from(c))).toString('utf8')
+    const parsed = JSON.parse(text)
+    return Array.isArray(parsed) ? parsed : []
+  } catch (err) {
+    console.error('[readDB error]', (err as Error).message)
+    return []
   }
-  const text = Buffer.concat(chunks.map((c) => Buffer.from(c))).toString('utf8')
-  return JSON.parse(text)
 }
 
 async function writeDB(posts: PostWithContent[]) {

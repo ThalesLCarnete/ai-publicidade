@@ -32,8 +32,13 @@ export async function POST(req: NextRequest) {
     const { blobCreatePost } = await import('@/lib/blob-store')
     try {
       await blobCreatePost(post)
-    } catch {
-      return NextResponse.json({ error: 'Slug já existe' }, { status: 409 })
+    } catch (err) {
+      const msg = (err as Error).message ?? String(err)
+      if (msg.includes('Slug já existe')) {
+        return NextResponse.json({ error: 'Slug já existe' }, { status: 409 })
+      }
+      console.error('[blob POST error]', msg)
+      return NextResponse.json({ error: msg }, { status: 500 })
     }
     return NextResponse.json(post, { status: 201 })
   }
