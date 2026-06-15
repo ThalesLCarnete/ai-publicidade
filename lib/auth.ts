@@ -45,6 +45,32 @@ export function verifyToken(token: string): string | null {
   }
 }
 
+// Autoriza requisições de escrita na API: Bearer token (n8n/automação)
+// ou cookie de sessão do admin (browser). Retorna o identificador do chamador ou null.
+export function authorizeRequest(req: {
+  headers: { get(name: string): string | null }
+  cookies: { get(name: string): { value: string } | undefined }
+}): string | null {
+  const auth = req.headers.get('authorization')
+  if (auth?.startsWith('Bearer ')) {
+    const token = auth.slice(7)
+    const expected = process.env.BLOG_API_TOKEN
+    if (
+      expected &&
+      token.length === expected.length &&
+      crypto.timingSafeEqual(Buffer.from(token), Buffer.from(expected))
+    ) {
+      return 'api-token'
+    }
+    return null
+  }
+
+  const cookie = req.cookies.get(COOKIE_NAME)
+  if (cookie) return verifyToken(cookie.value)
+
+  return null
+}
+
 export function cookieName(): string {
   return COOKIE_NAME
 }

@@ -1,0 +1,142 @@
+<!doctype html>
+<!--
+  Template: Selo Hype vs. Realidade — 1080×1350 (Instagram 4:5)
+  Placeholders (injetados pelo n8n antes do render):
+    {{titulo}}         título da notícia (máx ~80 chars; acima disso a fonte reduz via CSS)
+    {{nota_hype}}      inteiro 0-10
+    {{nota_realidade}} inteiro 0-10
+  Render (T07): Puppeteer/Browserless — viewport 1080×1350, deviceScaleFactor 1,
+  aguardar networkidle0 (fontes do Google), screenshot do body.
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Archivo:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1350px; overflow: hidden; }
+  body {
+    background: #0A0A0A;
+    color: #FFFFFF;
+    font-family: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 72px 80px 64px;
+  }
+  /* grade geométrica sutil (identidade do site) */
+  body::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,230,0,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,230,0,0.05) 1px, transparent 1px);
+    background-size: 90px 90px;
+    pointer-events: none;
+  }
+  .brand {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 44px;
+    letter-spacing: 6px;
+    color: #FFE600;
+  }
+  .quadro {
+    margin-top: 10px;
+    font-size: 24px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+  }
+  .titulo {
+    margin-top: 80px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 76px;
+    line-height: 1.15;
+    text-transform: uppercase;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .medidores { margin-top: auto; }
+  .medidor { margin-top: 56px; }
+  .medidor .rotulo {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 18px;
+  }
+  .medidor .nome {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 3px;
+  }
+  .medidor .valor {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 72px;
+  }
+  .medidor .valor small { font-size: 36px; color: rgba(255,255,255,0.45); }
+  .trilho {
+    height: 36px;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.18);
+  }
+  .barra { height: 100%; }
+  .hype  .nome, .hype .valor  { color: #FF4D4D; }
+  .hype  .barra { width: calc({{nota_hype}} * 10%); background: #FF4D4D; }
+  .real  .nome, .real .valor  { color: #FFE600; }
+  .real  .barra { width: calc({{nota_realidade}} * 10%); background: #FFE600; }
+  .assinatura {
+    margin-top: 96px;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,230,0,0.35);
+    display: flex;
+    justify-content: space-between;
+    font-size: 24px;
+    color: rgba(255,255,255,0.55);
+  }
+  .assinatura b { color: #FFFFFF; font-weight: 600; }
+  /* losango decorativo (assinatura visual do site) */
+  .diamond {
+    position: absolute; top: 64px; right: 72px;
+    width: 72px; height: 72px;
+    border: 2px solid rgba(255,230,0,0.5);
+    transform: rotate(45deg);
+  }
+  .diamond::after {
+    content: '';
+    position: absolute; inset: 14px;
+    border: 2px solid rgba(255,230,0,0.25);
+  }
+</style>
+</head>
+<body>
+  <div class="diamond"></div>
+  <div class="brand">IA TRADUZIDA</div>
+  <div class="quadro">Hype vs. Realidade</div>
+
+  <h1 class="titulo">{{titulo}}</h1>
+
+  <div class="medidores">
+    <div class="medidor hype">
+      <div class="rotulo">
+        <span class="nome">Hype</span>
+        <span class="valor">{{nota_hype}}<small>/10</small></span>
+      </div>
+      <div class="trilho"><div class="barra"></div></div>
+    </div>
+    <div class="medidor real">
+      <div class="rotulo">
+        <span class="nome">Realidade</span>
+        <span class="valor">{{nota_realidade}}<small>/10</small></span>
+      </div>
+      <div class="trilho"><div class="barra"></div></div>
+    </div>
+  </div>
+
+  <div class="assinatura">
+    <span>Escrito por agentes. <b>Auditado por um professor de IA.</b></span>
+    <span>@iatraduzida</span>
+  </div>
+</body>
+</html>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
 import type { Post } from '@/lib/posts'
+import { authorizeRequest } from '@/lib/auth'
 
 const MANIFEST = path.join(process.cwd(), 'content/posts/manifest.json')
 const CONTENT_DIR = path.join(process.cwd(), 'content/posts')
@@ -19,6 +20,10 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  if (!authorizeRequest(req)) {
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  }
+
   const body = await req.json()
   const { slug, title, excerpt, date, readTime, category, content } = body
 

@@ -1,0 +1,156 @@
+<!doctype html>
+<!--
+  Template: Termômetro da IA — 1080×1350 (Instagram 4:5 / LinkedIn)
+  Placeholders (injetados pelo n8n antes do render):
+    {{indice}}  inteiro 0-100 (índice de sentimento da semana)
+    {{semana}}  rótulo da semana, ex.: "Semana de 8 a 12 de junho"
+  Render (T07): Puppeteer/Browserless — viewport 1080×1350, deviceScaleFactor 1,
+  aguardar networkidle0, screenshot do body.
+  Leitura do índice: 0 = pessimismo total, 50 = neutro, 100 = euforia total.
+  Fontes do índice (fixas no rodapé): Bluesky + Reddit + Google Trends BR.
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Archivo:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1350px; overflow: hidden; }
+  body {
+    background: #0A0A0A;
+    color: #FFFFFF;
+    font-family: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 72px 80px 64px;
+  }
+  body::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,230,0,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,230,0,0.05) 1px, transparent 1px);
+    background-size: 90px 90px;
+    pointer-events: none;
+  }
+  .brand {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 44px;
+    letter-spacing: 6px;
+    color: #FFE600;
+  }
+  .quadro {
+    margin-top: 10px;
+    font-size: 24px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+  }
+  .semana {
+    margin-top: 6px;
+    font-size: 26px;
+    color: rgba(255,255,255,0.7);
+  }
+  .palco {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 110px;
+    margin: 40px 0;
+  }
+  /* termômetro */
+  .termo { display: flex; flex-direction: column; align-items: center; }
+  .tubo {
+    width: 120px; height: 620px;
+    border: 3px solid rgba(255,255,255,0.25);
+    border-radius: 60px 60px 0 0;
+    background: rgba(255,255,255,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+  .mercurio {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: {{indice}}%;
+    background: linear-gradient(to top, #FFE600, #FFB800);
+  }
+  .bulbo {
+    width: 190px; height: 190px;
+    border-radius: 50%;
+    background: #FFE600;
+    margin-top: -24px;
+    z-index: 1;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 76px;
+    color: #0A0A0A;
+  }
+  /* escala + número gigante */
+  .leitura { display: flex; flex-direction: column; justify-content: center; }
+  .indice {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 270px;
+    line-height: 0.9;
+    color: #FFE600;
+  }
+  .de-100 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 54px;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 2px;
+  }
+  .escala { margin-top: 56px; font-size: 26px; color: rgba(255,255,255,0.65); line-height: 1.9; }
+  .escala span { color: #FFE600; margin-right: 14px; font-family: 'Bebas Neue', sans-serif; font-size: 30px; }
+  .assinatura {
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,230,0,0.35);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 24px;
+    color: rgba(255,255,255,0.55);
+  }
+  .assinatura b { color: #FFFFFF; font-weight: 600; }
+  .fontes { font-size: 21px; color: rgba(255,255,255,0.4); }
+  .diamond {
+    position: absolute; top: 64px; right: 72px;
+    width: 72px; height: 72px;
+    border: 2px solid rgba(255,230,0,0.5);
+    transform: rotate(45deg);
+  }
+  .diamond::after {
+    content: '';
+    position: absolute; inset: 14px;
+    border: 2px solid rgba(255,230,0,0.25);
+  }
+</style>
+</head>
+<body>
+  <div class="diamond"></div>
+  <div class="brand">IA TRADUZIDA</div>
+  <div class="quadro">Termômetro da IA</div>
+  <div class="semana">{{semana}}</div>
+
+  <div class="palco">
+    <div class="termo">
+      <div class="tubo"><div class="mercurio"></div></div>
+      <div class="bulbo">{{indice}}</div>
+    </div>
+    <div class="leitura">
+      <div class="indice">{{indice}}</div>
+      <div class="de-100">DE 0 A 100</div>
+      <div class="escala">
+        <span>0–34</span> clima de cautela<br>
+        <span>35–64</span> clima neutro<br>
+        <span>65–100</span> clima de empolgação
+      </div>
+    </div>
+  </div>
+
+  <div class="assinatura">
+    <span>Escrito por agentes. <b>Auditado por um professor de IA.</b></span>
+    <span class="fontes">Índice calculado a partir de Bluesky, Reddit e Google Trends BR · @iatraduzida</span>
+  </div>
+</body>
+</html>

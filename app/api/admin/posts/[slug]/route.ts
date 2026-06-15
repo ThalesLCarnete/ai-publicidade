@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
 import type { Post } from '@/lib/posts'
+import { authorizeRequest } from '@/lib/auth'
 
 const MANIFEST = path.join(process.cwd(), 'content/posts/manifest.json')
 const CONTENT_DIR = path.join(process.cwd(), 'content/posts')
@@ -29,6 +30,10 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ slug: 
 }
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
+  if (!authorizeRequest(req)) {
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  }
+
   const { slug } = await params
   const body = await req.json()
 
@@ -51,7 +56,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ slug
   return NextResponse.json(posts[idx])
 }
 
-export async function DELETE(_: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
+  if (!authorizeRequest(req)) {
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  }
+
   const { slug } = await params
 
   if (useBlob()) {
