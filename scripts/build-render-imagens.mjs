@@ -33,6 +33,11 @@ function template(file) {
 const SELO = template('selo-hype.html')
 const TERMO = template('termometro.html')
 
+// Browserless configurável por env no momento do build (default = rede docker-compose).
+// Ex. na VPS (n8n npm, container em localhost): BROWSERLESS_URL=http://127.0.0.1:3000 node scripts/build-render-imagens.mjs
+const BROWSERLESS_URL = process.env.BROWSERLESS_URL || 'http://browserless:3000'
+const BROWSERLESS_TOKEN = process.env.BROWSERLESS_TOKEN || ''
+
 // ---------------------------------------------------------------------------
 // 2. Helpers de nós (mesmo estilo do build-brief-diario.mjs)
 // ---------------------------------------------------------------------------
@@ -108,9 +113,9 @@ return [
 //     >>> EDITE a URL/token do Browserless aqui (constantes no topo) <<<
 const nInject = code(
   'Injetar template',
-  `// >>> EDITE AQUI: Browserless self-hosted <<<
-const BROWSERLESS = 'http://browserless:3000'; // URL do container (ex.: nome do serviço no docker-compose)
-const TOKEN = '';                              // token do Browserless (env TOKEN do container); deixe '' se não usar
+  `// Browserless self-hosted (definido no build via BROWSERLESS_URL/BROWSERLESS_TOKEN; ver scripts/build-render-imagens.mjs).
+const BROWSERLESS = ${JSON.stringify(BROWSERLESS_URL)};
+const TOKEN = ${JSON.stringify(BROWSERLESS_TOKEN)};
 
 const TEMPLATES = {
   'selo-hype': ${JSON.stringify(SELO)},
