@@ -15,11 +15,13 @@ ainda não publicado em produção. Fonte de verdade: `docs/EXPORT_IA_TRADUZIDA.
   editor-cetico, dialetos WhatsApp/LinkedIn/Instagram).
 - `workflows/brief-diario.json` — Pipeline 1 em n8n puro (sem Flowise), gerado por
   `scripts/build-brief-diario.mjs`.
+- **T07** — `workflows/render-imagens.json`: sub-workflow reutilizável que renderiza os
+  templates em PNG 1080×1350 via Browserless. Gerado por `scripts/build-render-imagens.mjs`.
 - Templates de imagem `templates/selo-hype.html` e `templates/termometro.html`.
-- `docs/EXPORT_IA_TRADUZIDA.md` (fonte de verdade) e `docs/SETUP.md`.
+- `docs/EXPORT_IA_TRADUZIDA.md` (fonte de verdade) e `docs/SETUP.md` (com §8 do render).
 
-### Pendente (backlog T07–T13)
-- Workflows: render-imagens, termometro, aula-1-minuto, newsletter-semanal.
+### Pendente (backlog T08–T13)
+- Workflows: termometro, aula-1-minuto, newsletter-semanal.
 - `scripts/auditoria.py`, página Bastidores, expansão do SETUP.
 - Rebrand do frontend para IA Traduzida + corpus de voz em `agents/voz/`.
 

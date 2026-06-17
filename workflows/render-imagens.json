@@ -1,0 +1,182 @@
+{
+  "name": "IA Traduzida — Render de Imagens",
+  "nodes": [
+    {
+      "name": "Quando chamado por outro workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "name": "Disparo manual (teste)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        260,
+        480
+      ]
+    },
+    {
+      "name": "Exemplo p/ teste",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        480
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Dois itens de exemplo — um selo, um termômetro. Edite à vontade para testar.\nreturn [\n  { json: { template: 'selo-hype', data: {\n    titulo: 'Modelo de IA promete diagnosticar doenças, mas estudo ainda é preliminar',\n    nota_hype: 8,\n    nota_realidade: 4,\n  } } },\n  { json: { template: 'termometro', data: {\n    indice: 62,\n    semana: 'Semana de 9 a 13 de junho',\n  } } },\n];"
+      }
+    },
+    {
+      "name": "Injetar template",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// >>> EDITE AQUI: Browserless self-hosted <<<\nconst BROWSERLESS = 'http://browserless:3000'; // URL do container (ex.: nome do serviço no docker-compose)\nconst TOKEN = '';                              // token do Browserless (env TOKEN do container); deixe '' se não usar\n\nconst TEMPLATES = {\n  'selo-hype': \"<!doctype html>\\n<!--\\n  Template: Selo Hype vs. Realidade — 1080×1350 (Instagram 4:5)\\n  Placeholders (injetados pelo n8n antes do render):\\n    {{titulo}}         título da notícia (máx ~80 chars; acima disso a fonte reduz via CSS)\\n    {{nota_hype}}      inteiro 0-10\\n    {{nota_realidade}} inteiro 0-10\\n  Render (T07): Puppeteer/Browserless — viewport 1080×1350, deviceScaleFactor 1,\\n  aguardar networkidle0 (fontes do Google), screenshot do body.\\n-->\\n<html lang=\\\"pt-BR\\\">\\n<head>\\n<meta charset=\\\"utf-8\\\">\\n<link href=\\\"https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Archivo:wght@400;600&display=swap\\\" rel=\\\"stylesheet\\\">\\n<style>\\n  * { margin: 0; padding: 0; box-sizing: border-box; }\\n  html, body { width: 1080px; height: 1350px; overflow: hidden; }\\n  body {\\n    background: #0A0A0A;\\n    color: #FFFFFF;\\n    font-family: 'Archivo', 'Helvetica Neue', Arial, sans-serif;\\n    position: relative;\\n    display: flex;\\n    flex-direction: column;\\n    padding: 72px 80px 64px;\\n  }\\n  /* grade geométrica sutil (identidade do site) */\\n  body::before {\\n    content: '';\\n    position: absolute; inset: 0;\\n    background-image:\\n      linear-gradient(rgba(255,230,0,0.05) 1px, transparent 1px),\\n      linear-gradient(90deg, rgba(255,230,0,0.05) 1px, transparent 1px);\\n    background-size: 90px 90px;\\n    pointer-events: none;\\n  }\\n  .brand {\\n    font-family: 'Bebas Neue', sans-serif;\\n    font-size: 44px;\\n    letter-spacing: 6px;\\n    color: #FFE600;\\n  }\\n  .quadro {\\n    margin-top: 10px;\\n    font-size: 24px;\\n    letter-spacing: 4px;\\n    text-transform: uppercase;\\n    color: rgba(255,255,255,0.55);\\n  }\\n  .titulo {\\n    margin-top: 80px;\\n    font-family: 'Bebas Neue', sans-serif;\\n    font-size: 76px;\\n    line-height: 1.15;\\n    text-transform: uppercase;\\n    display: -webkit-box;\\n    -webkit-line-clamp: 4;\\n    -webkit-box-orient: vertical;\\n    overflow: hidden;\\n  }\\n  .medidores { margin-top: auto; }\\n  .medidor { margin-top: 56px; }\\n  .medidor .rotulo {\\n    display: flex;\\n    justify-content: space-between;\\n    align-items: baseline;\\n    margin-bottom: 18px;\\n  }\\n  .medidor .nome {\\n    font-family: 'Bebas Neue', sans-serif;\\n    font-size: 52px;\\n    letter-spacing: 3px;\\n  }\\n  .medidor .valor {\\n    font-family: 'Bebas Neue', sans-serif;\\n    font-size: 72px;\\n  }\\n  .medidor .valor small { font-size: 36px; color: rgba(255,255,255,0.45); }\\n  .trilho {\\n    height: 36px;\\n    background: rgba(255,255,255,0.10);\\n    border: 1px solid rgba(255,255,255,0.18);\\n  }\\n  .barra { height: 100%; }\\n  .hype  .nome, .hype .valor  { color: #FF4D4D; }\\n  .hype  .barra { width: calc({{nota_hype}} * 10%); background: #FF4D4D; }\\n  .real  .nome, .real .valor  { color: #FFE600; }\\n  .real  .barra { width: calc({{nota_realidade}} * 10%); background: #FFE600; }\\n  .assinatura {\\n    margin-top: 96px;\\n    padding-top: 32px;\\n    border-top: 1px solid rgba(255,230,0,0.35);\\n    display: flex;\\n    justify-content: space-between;\\n    font-size: 24px;\\n    color: rgba(255,255,255,0.55);\\n  }\\n  .assinatura b { color: #FFFFFF; font-weight: 600; }\\n  /* losango decorativo (assinatura visual do site) */\\n  .diamond {\\n    position: absolute; top: 64px; right: 72px;\\n    width: 72px; height: 72px;\\n    border: 2px solid rgba(255,230,0,0.5);\\n    transform: rotate(45deg);\\n  }\\n  .diamond::after {\\n    content: '';\\n    position: absolute; inset: 14px;\\n    border: 2px solid rgba(255,230,0,0.25);\\n  }\\n</style>\\n</head>\\n<body>\\n  <div class=\\\"diamond\\\"></div>\\n  <div class=\\\"brand\\\">IA TRADUZIDA</div>\\n  <div class=\\\"quadro\\\">Hype vs. Realidade</div>\\n\\n  <h1 class=\\\"titulo\\\">{{titulo}}</h1>\\n\\n  <div class=\\\"medidores\\\">\\n    <div class=\\\"medidor hype\\\">\\n      <div class=\\\"rotulo\\\">\\n        <span class=\\\"nome\\\">Hype</span>\\n        <span class=\\\"valor\\\">{{nota_hype}}<small>/10</small></span>\\n      </div>\\n      <div class=\\\"trilho\\\"><div class=\\\"barra\\\"></div></div>\\n    </div>\\n    <div class=\\\"medidor real\\\">\\n      <div class=\\\"rotulo\\\">\\n        <span class=\\\"nome\\\">Realidade</span>\\n        <span class=\\\"valor\\\">{{nota_realidade}}<small>/10</small></span>\\n      </div>\\n      <div class=\\\"trilho\\\"><div class=\\\"barra\\\"></div></div>\\n    </div>\\n  </div>\\n\\n  <div class=\\\"assinatura\\\">\\n    <span>Escrito por agentes. <b>Auditado por um professor de IA.</b></span>\\n    <span>@iatraduzida</span>\\n  </div>\\n</body>\\n</html>\\n\",\n  'termometro': \"<!doctype html>\\n<!--\\n  Template: Termômetro da IA — 1080×1350 (Instagram 4:5 / LinkedIn)\\n  Placeholders (injetados pelo n8n antes do render):\\n    {{indice}}  inteiro 0-100 (índice de sentimento da semana)\\n    {{semana}}  rótulo da semana, ex.: \\\"Semana de 8 a 12 de junho\\\"\\n  Render (T07): Puppeteer/Browserless — viewport 1080×1350, deviceScaleFactor 1,\\n  aguardar networkidle0, screenshot do body.\\n  Leitura do índice: 0 = pessimismo total, 50 = neutro, 100 = euforia total.\\n  Fontes do índice (fixas no rodapé): Bluesky + Reddit + Google Trends BR.\\n-->\\n<html lang=\\\"pt-BR\\\">\\n<head>\\n<meta charset=\\\"utf-8\\\">\\n<link href=\\\"https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Archivo:wght@400;600&display=swap\\\" rel=\\\"stylesheet\\\">\\n<style>\\n  * { margin: 0; padding: 0; box-sizing: border-box; }\\n  html, body { width: 1080px; height: 1350px; overflow: hidden; }\\n  body {\\n    background: #0A0A0A;\\n    color: #FFFFFF;\\n    font-family: 'Archivo', 'Helvetica Neue', Arial, sans-serif;\\n    position: relative;\\n    display: flex;\\n    flex-direction: column;\\n    padding: 72px 80px 64px;\\n  }\\n  body::before {\\n    content: '';\\n    position: absolute; inset: 0;\\n    background-image:\\n      linear-gradient(rgba(255,230,0,0.05) 1px, transparent 1px),\\n      linear-gradient(90deg, rgba(255,230,0,0.05) 1px, transparent 1px);\\n    background-size: 90px 90px;\\n    pointer-events: none;\\n  }\\n  .brand {\\n    font-family: 'Bebas Neue', sans-serif;\\n    font-size: 44px;\\n    letter-spacing: 6px;\\n    color: #FFE600;\\n  }\\n  .quadro {\\n    margin-top: 10px;\\n    font-size: 24px;\\n    letter-spacing: 4px;\\n    text-transform: uppercase;\\n    color: rgba(255,255,255,0.55);\\n  }\\n  .semana {\\n    margin-top: 6px;\\n    font-size: 26px;\\n    color: rgba(255,255,255,0.7);\\n  }\\n  .palco {\\n    flex: 1;\\n    display: flex;\\n    align-items: center;\\n    justify-content: center;\\n    gap: 110px;\\n    margin: 40px 0;\\n  }\\n  /* termômetro */\\n  .termo { display: flex; flex-direction: column; align-items: center; }\\n  .tubo {\\n    width: 120px; height: 620px;\\n    border: 3px solid rgba(255,255,255,0.25);\\n    border-radius: 60px 60px 0 0;\\n    background: rgba(255,255,255,0.06);\\n    position: relative;\\n    overflow: hidden;\\n  }\\n  .mercurio {\\n    position: absolute; bottom: 0; left: 0; right: 0;\\n    height: {{indice}}%;\\n    background: linear-gradient(to top, #FFE600, #FFB800);\\n  }\\n  .bulbo {\\n    width: 190px; height: 190px;\\n    border-radius: 50%;\\n    background: #FFE600;\\n    margin-top: -24px;\\n    z-index: 1;\\n    display: flex; align-items: center; justify-content: center;\\n    font-family: 'Bebas Neue', sans-serif;\\n    font-size: 76px;\\n    color: #0A0A0A;\\n  }\\n  /* escala + número gigante */\\n  .leitura { display: flex; flex-direction: column; justify-content: center; }\\n  .indice {\\n    font-family: 'Bebas Neue', sans-serif;\\n    font-size: 270px;\\n    line-height: 0.9;\\n    color: #FFE600;\\n  }\\n  .de-100 {\\n    font-family: 'Bebas Neue', sans-serif;\\n    font-size: 54px;\\n    color: rgba(255,255,255,0.45);\\n    letter-spacing: 2px;\\n  }\\n  .escala { margin-top: 56px; font-size: 26px; color: rgba(255,255,255,0.65); line-height: 1.9; }\\n  .escala span { color: #FFE600; margin-right: 14px; font-family: 'Bebas Neue', sans-serif; font-size: 30px; }\\n  .assinatura {\\n    padding-top: 32px;\\n    border-top: 1px solid rgba(255,230,0,0.35);\\n    display: flex;\\n    flex-direction: column;\\n    gap: 10px;\\n    font-size: 24px;\\n    color: rgba(255,255,255,0.55);\\n  }\\n  .assinatura b { color: #FFFFFF; font-weight: 600; }\\n  .fontes { font-size: 21px; color: rgba(255,255,255,0.4); }\\n  .diamond {\\n    position: absolute; top: 64px; right: 72px;\\n    width: 72px; height: 72px;\\n    border: 2px solid rgba(255,230,0,0.5);\\n    transform: rotate(45deg);\\n  }\\n  .diamond::after {\\n    content: '';\\n    position: absolute; inset: 14px;\\n    border: 2px solid rgba(255,230,0,0.25);\\n  }\\n</style>\\n</head>\\n<body>\\n  <div class=\\\"diamond\\\"></div>\\n  <div class=\\\"brand\\\">IA TRADUZIDA</div>\\n  <div class=\\\"quadro\\\">Termômetro da IA</div>\\n  <div class=\\\"semana\\\">{{semana}}</div>\\n\\n  <div class=\\\"palco\\\">\\n    <div class=\\\"termo\\\">\\n      <div class=\\\"tubo\\\"><div class=\\\"mercurio\\\"></div></div>\\n      <div class=\\\"bulbo\\\">{{indice}}</div>\\n    </div>\\n    <div class=\\\"leitura\\\">\\n      <div class=\\\"indice\\\">{{indice}}</div>\\n      <div class=\\\"de-100\\\">DE 0 A 100</div>\\n      <div class=\\\"escala\\\">\\n        <span>0–34</span> clima de cautela<br>\\n        <span>35–64</span> clima neutro<br>\\n        <span>65–100</span> clima de empolgação\\n      </div>\\n    </div>\\n  </div>\\n\\n  <div class=\\\"assinatura\\\">\\n    <span>Escrito por agentes. <b>Auditado por um professor de IA.</b></span>\\n    <span class=\\\"fontes\\\">Índice calculado a partir de Bluesky, Reddit e Google Trends BR · @iatraduzida</span>\\n  </div>\\n</body>\\n</html>\\n\",\n};\n\nconst tplName = $json.template;\nconst data = $json.data || {};\nconst tpl = TEMPLATES[tplName];\nif (!tpl) throw new Error('template desconhecido: \"' + tplName + '\" (use \"selo-hype\" ou \"termometro\")');\n\nlet html = tpl;\nfor (const [k, v] of Object.entries(data)) {\n  const safe = String(v).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));\n  html = html.split('{{' + k + '}}').join(safe);\n}\n\nconst faltando = html.match(/\\{\\{\\s*[\\w.-]+\\s*\\}\\}/g);\nif (faltando) throw new Error('placeholders sem valor para \"' + tplName + '\": ' + [...new Set(faltando)].join(', '));\n\nconst endpoint = BROWSERLESS.replace(/\\/$/, '') + '/screenshot' + (TOKEN ? ('?token=' + encodeURIComponent(TOKEN)) : '');\nconst filename = tplName + '-' + new Date().toISOString().slice(0, 10) + '.png';\nreturn { json: { html, endpoint, filename, template: tplName } };"
+      }
+    },
+    {
+      "name": "Render PNG (Browserless)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.endpoint }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ html: $json.html, options: { type: 'png', fullPage: false }, viewport: { width: 1080, height: 1350, deviceScaleFactor: 1 }, gotoOptions: { waitUntil: 'networkidle0', timeout: 30000 } }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          },
+          "timeout": 60000
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "name": "Nomear arquivo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const item = $input.item;\nconst fname = $('Injetar template').item.json.filename || 'imagem.png';\nif (item.binary && item.binary.data) {\n  item.binary.data.fileName = fname;\n  item.binary.data.fileExtension = 'png';\n  item.binary.data.mimeType = 'image/png';\n}\nreturn item;"
+      }
+    },
+    {
+      "name": "README",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        20
+      ],
+      "parameters": {
+        "width": 540,
+        "height": 300,
+        "content": "## Render de Imagens — IA Traduzida (T07)\\nGerado por `scripts/build-render-imagens.mjs` — não edite à mão; edite os `templates/*.html` e regenere.\\n\\n**Sub-workflow reutilizável.** Outros workflows chamam via *Execute Sub-workflow* passando, por item:\\n```\\n{ \"template\": \"selo-hype\", \"data\": { \"titulo\": \"...\", \"nota_hype\": 8, \"nota_realidade\": 4 } }\\n{ \"template\": \"termometro\", \"data\": { \"indice\": 62, \"semana\": \"Semana de 9 a 13 de junho\" } }\\n```\\nDevolve o PNG 1080×1350 na propriedade binária `data`.\\n\\n**Antes de usar:** edite `BROWSERLESS`/`TOKEN` no nó *Injetar template* (Browserless self-hosted)."
+      }
+    },
+    {
+      "name": "Nota teste",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1520,
+        560
+      ],
+      "parameters": {
+        "width": 320,
+        "height": 160,
+        "content": "### Testar\\nClique **Execute Workflow** — o ramo *Disparo manual → Exemplo* gera um selo e um termômetro de teste. Confira o PNG na aba de output do nó *Nomear arquivo*."
+      }
+    }
+  ],
+  "connections": {
+    "Quando chamado por outro workflow": {
+      "main": [
+        [
+          {
+            "node": "Injetar template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Disparo manual (teste)": {
+      "main": [
+        [
+          {
+            "node": "Exemplo p/ teste",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Exemplo p/ teste": {
+      "main": [
+        [
+          {
+            "node": "Injetar template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Injetar template": {
+      "main": [
+        [
+          {
+            "node": "Render PNG (Browserless)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Render PNG (Browserless)": {
+      "main": [
+        [
+          {
+            "node": "Nomear arquivo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "generatedBy": "scripts/build-render-imagens.mjs",
+    "generatedAt": "2026-06-17T15:08:12.420Z"
+  }
+}

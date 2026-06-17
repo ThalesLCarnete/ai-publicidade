@@ -81,3 +81,29 @@ Para ativar a voz de verdade:
 ## 7. Requisito de versão
 
 O nó `Aprovação no Telegram` usa **Send and Wait for Response** (n8n ≥ 1.15). Em n8n mais antigo, substitua por **Telegram → Send Message** + nó **Wait (On webhook call)** e ligue o botão ao webhook de retomada.
+
+---
+
+## 8. Render de Imagens (`workflows/render-imagens.json` — T07)
+
+Sub-workflow **reutilizável** que transforma os `templates/*.html` em PNG 1080×1350 via **Browserless** self-hosted. Não tem cron próprio: é chamado por outros workflows (Instagram do Brief, Termômetro, Aula de 1 Minuto) através do nó **Execute Sub-workflow**.
+
+> Gerado por `scripts/build-render-imagens.mjs` (lê `templates/*.html` e os embute no JSON). Mudou um template? Rode `node scripts/build-render-imagens.mjs` e reimporte.
+
+### 8.1 Browserless (1 serviço, sem credencial do n8n)
+- Suba um Browserless self-hosted (Docker), na mesma rede do n8n. Ex.: `ghcr.io/browserless/chromium`, porta `3000`.
+- No nó **`Injetar template`**, edite as duas constantes do topo:
+  - `BROWSERLESS` = URL do container (ex.: `http://browserless:3000` se estiverem no mesmo docker-compose).
+  - `TOKEN` = token do Browserless (env `TOKEN` do container), ou deixe `''` se não usar token.
+- Não precisa criar credencial no n8n: a chamada é um HTTP Request POST em `{BROWSERLESS}/screenshot`.
+
+### 8.2 Contrato de entrada
+Cada item recebido deve ter `template` e `data`:
+```json
+{ "template": "selo-hype",  "data": { "titulo": "...", "nota_hype": 8, "nota_realidade": 4 } }
+{ "template": "termometro", "data": { "indice": 62, "semana": "Semana de 9 a 13 de junho" } }
+```
+Saída: o PNG na propriedade binária `data`, nomeado `selo-hype-AAAA-MM-DD.png` / `termometro-AAAA-MM-DD.png`. Placeholders sem valor ou template desconhecido fazem o nó falhar com mensagem clara.
+
+### 8.3 Teste
+Abra o workflow e clique **Execute Workflow**: o ramo *Disparo manual → Exemplo p/ teste* gera um selo e um termômetro de amostra. Confira o PNG no output do nó **`Nomear arquivo`**.
