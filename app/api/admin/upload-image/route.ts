@@ -14,21 +14,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }
 
-  const contentType = req.headers.get('content-type') || 'application/octet-stream'
-  const allowed = ['image/png', 'image/jpeg', 'image/webp']
-  if (!allowed.some((t) => contentType.startsWith(t))) {
-    return NextResponse.json(
-      { error: `content-type não suportado: ${contentType}. Use ${allowed.join(', ')}.` },
-      { status: 415 },
-    )
-  }
-
   const buf = Buffer.from(await req.arrayBuffer())
   if (buf.byteLength === 0) {
     return NextResponse.json({ error: 'body vazio' }, { status: 400 })
   }
 
-  const ext = contentType === 'image/jpeg' ? 'jpg' : contentType === 'image/webp' ? 'webp' : 'png'
+  // Detecta o tipo pelos magic bytes (não confia no Content-Type — o n8n às
+  // vezes manda application/octet-stream pra binário).
+  function sniff(b: Buffer): { mime: string; ext: string } | null {
+    if (b.length >= 8 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return { mime: 'image/png', ext: 'png' }
+    if (b.length >= 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return { mime: 'image/jpeg', ext: 'jpg' }
+    if (b.length >= 12 && b.toString('ascii', 0, 4) === 'RIFF' && b.toString('ascii', 8, 12) === 'WEBP') return { mime: 'image/webp', ext: 'webp' }
+    return null
+  }
+  const detected = sniff(buf)
+  if (!detected) {
+    return NextResponse.json({ error: 'conteúdo não é PNG, JPEG ou WebP (magic bytes)' }, { status: 415 })
+  }
+  const contentType = detected.mime
+  const ext = detected.ext
   const nameParam = new URL(req.url).searchParams.get('name') || ''
   const safeName = nameParam.replace(/[^a-zA-Z0-9._-]/g, '-').slice(0, 80)
   const stem = safeName.replace(/\.(png|jpe?g|webp)$/i, '') || `cover-${Date.now()}`
