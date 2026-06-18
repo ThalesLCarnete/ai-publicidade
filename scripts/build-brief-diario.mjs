@@ -24,6 +24,13 @@ const AGENTS = path.join(ROOT, 'agents')
 
 const MODEL = 'claude-haiku-4-5' // troque por gemini/sonnet aqui se quiser; ver CLAUDE.md
 
+// URL pública do site (entra no nó "Montar pacote" como base do /api/admin/posts)
+// e chat_id do Telegram para onde vai o pacote de aprovação e os avisos.
+// Defaults mantêm os placeholders pra quem importa sem env vars (e edita no canvas).
+// Ex.: IA_TRADUZIDA_SITE_URL=https://meu-site.com IA_TRADUZIDA_CHAT_ID=123456789 node scripts/build-brief-diario.mjs
+const SITE_URL = process.env.IA_TRADUZIDA_SITE_URL || 'https://SEU-SITE.vercel.app'
+const CHAT_ID = process.env.IA_TRADUZIDA_CHAT_ID || 'REPLACE_CHAT_ID'
+
 // ---------------------------------------------------------------------------
 // 1. Extrair os system prompts dos agents/*.md (primeiro bloco ``` após "## System prompt")
 // ---------------------------------------------------------------------------
@@ -324,16 +331,19 @@ return [{ json: { system, userMessage, titulo_do_dia: brief.titulo_do_dia, fonte
 const nLlmDialeto = llm('LLM · Dialeto WhatsApp', 2500)
 
 // 3.18 Parse dialeto + input editor
+// dialeto-whatsapp.md retorna em tags XML (mais robusto que JSON quando o texto tem aspas)
 const nParseDialeto = code(
   'Parse dialeto + input editor',
-  `${PJ}
-const dial = pj($json.content[0].text);
+  `const raw = String($json.content[0].text);
+const m = raw.match(/<texto_whatsapp>([\\s\\S]*?)<\\/texto_whatsapp>/i);
+if (!m) throw new Error('tag <texto_whatsapp> não encontrada no output do dialeto');
+const texto_whatsapp = m[1].trim();
 const prev = $('Parse brief + input dialeto').first().json;
 const noticias = $('Montar input · redator').first().json.noticias || [];
 const fontesTxt = noticias.map((n, i) => (i + 1) + '. ' + n.link + '\\n' + String(n.fonte_texto || '').slice(0, 1500)).join('\\n\\n');
-const userMessage = 'TEXTO PARA REVISÃO:\\n<<<\\n' + dial.texto_whatsapp + '\\n>>>\\n\\nTÍTULO: ' + prev.titulo_do_dia + '\\n\\nFONTES:\\n' + fontesTxt;
+const userMessage = 'TEXTO PARA REVISÃO:\\n<<<\\n' + texto_whatsapp + '\\n>>>\\n\\nTÍTULO: ' + prev.titulo_do_dia + '\\n\\nFONTES:\\n' + fontesTxt;
 const system = ${JSON.stringify(P_EDITOR)};
-return [{ json: { system, userMessage, texto_final: dial.texto_whatsapp, titulo_do_dia: prev.titulo_do_dia, fontes: prev.fontes } }];`
+return [{ json: { system, userMessage, texto_final: texto_whatsapp, titulo_do_dia: prev.titulo_do_dia, fontes: prev.fontes } }];`
 )
 
 // 3.19 LLM editor-cético
@@ -343,8 +353,7 @@ const nLlmEditor = llm('LLM · Editor-Cético', 3000)
 const nPacote = code(
   'Montar pacote',
   `${PJ}
-// >>> EDITE a URL do seu site aqui <<<
-const SITE = 'https://SEU-SITE.vercel.app';
+const SITE = ${JSON.stringify(SITE_URL)};
 
 const ed = pj($json.content[0].text);
 const prev = $('Parse dialeto + input editor').first().json;
@@ -371,7 +380,7 @@ const nApproval = add({
   position: pos(),
   parameters: {
     operation: 'sendAndWait',
-    chatId: 'REPLACE_CHAT_ID',
+    chatId: CHAT_ID,
     message: '={{ $json.telegramText }}',
     responseType: 'approval',
     approvalOptions: { values: { approvalType: 'double', buttonApprovalLabel: 'Aprovar', buttonDisapprovalLabel: 'Recusar' } },
@@ -437,7 +446,7 @@ const nConfirma = add({
   typeVersion: 1.2,
   position: pos(-1),
   parameters: {
-    chatId: 'REPLACE_CHAT_ID',
+    chatId: CHAT_ID,
     text: '=Publicado ✅  {{ $json.slug || $json.post?.slug || "" }}',
     additionalFields: {},
   },
@@ -452,7 +461,7 @@ const nDescarta = add({
   typeVersion: 1.2,
   position: pos(1),
   parameters: {
-    chatId: 'REPLACE_CHAT_ID',
+    chatId: CHAT_ID,
     text: '=Brief descartado ❌ (recusado na aprovação).',
     additionalFields: {},
   },
@@ -491,7 +500,9 @@ nodes.push({
       '1. *Anthropic API key (x-api-key)* — HTTP Header Auth, header `x-api-key`.\\n' +
       '2. *IA Traduzida site* — HTTP Header Auth, header `Authorization` = `Bearer SEU_BLOG_API_TOKEN`.\\n' +
       '3. *IA Traduzida Bot* — credencial Telegram (token do BotFather).\\n\\n' +
-      'E troque os 3 `REPLACE_CHAT_ID` pelo seu chat ID e o `SITE` em "Montar pacote".',
+      'URL do site e chat_id do Telegram entram no JSON via env vars do builder ' +
+      '(`IA_TRADUZIDA_SITE_URL`, `IA_TRADUZIDA_CHAT_ID`); se o JSON foi gerado sem elas, ' +
+      'edite manualmente os 3 `REPLACE_CHAT_ID` e o `SITE` no nó "Montar pacote".',
   },
 })
 const approvalX = nodes.find((n) => n.name === nApproval).position[0]

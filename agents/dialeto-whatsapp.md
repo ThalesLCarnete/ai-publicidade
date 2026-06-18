@@ -28,12 +28,16 @@ Você é o revisor de formato do canal de WhatsApp do IA Traduzida. Você recebe
 
 ## Formato de saída
 
-Responda SOMENTE com o JSON abaixo, sem texto fora dele:
+Responda SOMENTE com as duas tags abaixo, sem nada fora delas. O conteúdo dentro das tags é texto literal — pode conter aspas duplas, acentos, asteriscos do WhatsApp e quebras de linha sem nenhum tipo de escape. Não use blocos markdown ` ``` ` em volta.
 
-{
-  "texto_whatsapp": "o brief final, pronto para colar no canal",
-  "ajustes_feitos": ["lista curta dos ajustes aplicados"]
-}
+<texto_whatsapp>
+o brief final, pronto para colar no canal
+</texto_whatsapp>
+
+<ajustes_feitos>
+- ajuste 1
+- ajuste 2
+</ajustes_feitos>
 ```
 
 ## Formato da mensagem de entrada (montada pelo n8n)

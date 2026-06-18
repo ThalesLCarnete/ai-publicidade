@@ -41,11 +41,23 @@ Crie em **Credentials → New** e depois associe a cada nó (o n8n marca os nós
 
 ---
 
-## 3. Dois ajustes manuais no canvas
+## 3. Chat ID e URL do site — duas formas
 
-1. **Chat ID** — troque os **3** `REPLACE_CHAT_ID` (nós de Telegram) pelo seu chat ID.
-   Pegue-o mandando qualquer mensagem para **@userinfobot** no Telegram.
-2. **URL do site** — no nó **`Montar pacote`**, edite a linha `const SITE = 'https://SEU-SITE.vercel.app';` com o domínio real do deploy.
+O JSON importado vem com placeholders `REPLACE_CHAT_ID` (nos 3 nós Telegram) e `https://SEU-SITE.vercel.app` (no nó "Montar pacote"). Pra trocar pelos valores reais:
+
+**Forma A (recomendada) — env vars no build:**
+```bash
+IA_TRADUZIDA_SITE_URL=https://seu-site.vercel.app \
+IA_TRADUZIDA_CHAT_ID=123456789 \
+node scripts/build-brief-diario.mjs
+```
+Os placeholders saem do JSON gerado. Reimporte no n8n e está pronto.
+
+**Forma B — edição manual no canvas:**
+1. Nos 3 nós Telegram, edite `REPLACE_CHAT_ID` pelo chat_id (pegue mandando qualquer msg pra **@userinfobot**).
+2. No nó "Montar pacote", edite `const SITE = 'https://SEU-SITE.vercel.app';` pra o domínio real.
+
+Os JSONs versionados no git ficam com placeholders por segurança (chat_id não é segredo forte, mas não convém vazar no GitHub público).
 
 ---
 
@@ -92,10 +104,14 @@ Sub-workflow **reutilizável** que transforma os `templates/*.html` em PNG 1080�
 
 ### 8.1 Browserless (1 serviço, sem credencial do n8n)
 - Suba um Browserless self-hosted (Docker), na mesma rede do n8n. Ex.: `ghcr.io/browserless/chromium`, porta `3000`.
-- No nó **`Injetar template`**, edite as duas constantes do topo:
-  - `BROWSERLESS` = URL do container (ex.: `http://browserless:3000` se estiverem no mesmo docker-compose).
-  - `TOKEN` = token do Browserless (env `TOKEN` do container), ou deixe `''` se não usar token.
 - Não precisa criar credencial no n8n: a chamada é um HTTP Request POST em `{BROWSERLESS}/screenshot`.
+- URL e token entram no JSON via env vars do builder (mesmo padrão do brief diário, seção 3):
+  ```bash
+  BROWSERLESS_URL=http://browserless:3000 \
+  BROWSERLESS_TOKEN=seu-token \
+  node scripts/build-render-imagens.mjs
+  ```
+- Defaults: `BROWSERLESS_URL=http://browserless:3000`, `BROWSERLESS_TOKEN=''` (sem auth). Se preferir editar manual: as duas constantes ficam no topo do `jsCode` do nó **`Injetar template`**.
 
 ### 8.2 Contrato de entrada
 Cada item recebido deve ter `template` e `data`:
