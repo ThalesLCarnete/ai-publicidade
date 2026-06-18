@@ -378,11 +378,14 @@ const problemas = (ed.problemas || []).map((p) => '• ' + p).join('\\n');
 const telegramText = flag + ' — Editor-Cético: ' + ed.score + '/100\\n\\n' + prev.texto_final +
   '\\n\\n— — —\\n' + (problemas ? 'Apontamentos:\\n' + problemas : 'Sem apontamentos.') +
   '\\n\\nAprovar = publica no site. Recusar = descarta.';
+// Telegram limita mensagens a 4096 chars; trunca a prévia (o texto completo vai pro site).
+const TG_MAX = 3900;
+const telegramTextSafe = telegramText.length > TG_MAX ? (telegramText.slice(0, TG_MAX) + '\\n\\n[...] texto completo será publicado no site') : telegramText;
 const post = {
   slug, title: prev.titulo_do_dia, excerpt: String(prev.texto_final).replace(/[*_]/g, '').slice(0, 160),
   date: hoje, readTime: '3 min', category: 'Brief', content: prev.texto_final,
 };
-return [{ json: { telegramText, post, apiUrl: SITE + '/api/admin/posts', score: ed.score, veredito: ed.veredito } }];`
+return [{ json: { telegramText: telegramTextSafe, post, apiUrl: SITE + '/api/admin/posts', score: ed.score, veredito: ed.veredito } }];`
 )
 
 // 3.21 Aprovação no Telegram (pausa a execução até o clique)
