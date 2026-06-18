@@ -8,6 +8,7 @@ export type Post = {
   date: string
   readTime: string
   category: string
+  coverImage?: string
 }
 
 const MANIFEST = path.join(process.cwd(), 'content/posts/manifest.json')

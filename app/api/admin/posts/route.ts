@@ -25,13 +25,13 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const { slug, title, excerpt, date, readTime, category, content } = body
+  const { slug, title, excerpt, date, readTime, category, content, coverImage } = body
 
   if (!slug || !title || !content) {
     return NextResponse.json({ error: 'slug, title e content são obrigatórios' }, { status: 400 })
   }
 
-  const post: Post & { content: string } = { slug, title, excerpt, date, readTime, category, content }
+  const post: Post & { content: string } = { slug, title, excerpt, date, readTime, category, content, coverImage }
 
   if (useBlob()) {
     const { blobCreatePost } = await import('@/lib/blob-store')

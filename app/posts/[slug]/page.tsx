@@ -96,6 +96,18 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
               </p>
             </div>
           </div>
+
+          {post.coverImage && (
+            <div className="mt-10 border border-white/10">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={post.coverImage}
+                alt={post.title}
+                className="block w-full h-auto"
+                loading="eager"
+              />
+            </div>
+          )}
         </div>
       </div>
 
