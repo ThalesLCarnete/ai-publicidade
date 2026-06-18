@@ -3,7 +3,10 @@ import { put } from '@vercel/blob'
 import crypto from 'crypto'
 import { authorizeRequest } from '@/lib/auth'
 
-// Aceita upload binário (PNG/JPEG/WebP) e devolve a URL pública no Vercel Blob.
+// Aceita upload binário (PNG/JPEG/WebP), salva no Vercel Blob (store private)
+// e devolve uma URL de proxy (/api/cover) que serve a imagem publicamente.
+// O store deste projeto é private (modo imutável, definido na criação), então
+// o blob não é acessível direto por <img src>; o proxy lê via SDK e entrega.
 // Uso pelo n8n: POST raw binary, header `Authorization: Bearer $BLOG_API_TOKEN`,
 // query `?name=meu-slug.png` opcional. Retorna `{ url }`.
 export async function POST(req: NextRequest) {
@@ -34,12 +37,15 @@ export async function POST(req: NextRequest) {
 
   try {
     const blob = await put(key, buf, {
-      access: 'public',
+      access: 'private',
       addRandomSuffix: false,
       allowOverwrite: false,
       contentType,
     })
-    return NextResponse.json({ url: blob.url }, { status: 201 })
+    // O blob é private — devolve URL de proxy (/api/cover) que serve publicamente.
+    const origin = new URL(req.url).origin
+    const proxyUrl = `${origin}/api/cover?b=${encodeURIComponent(blob.url)}`
+    return NextResponse.json({ url: proxyUrl, blobUrl: blob.url }, { status: 201 })
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     console.error('[upload-image] put failed:', msg)
