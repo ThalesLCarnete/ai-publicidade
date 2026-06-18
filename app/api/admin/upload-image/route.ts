@@ -32,12 +32,17 @@ export async function POST(req: NextRequest) {
   const suffix = crypto.randomBytes(4).toString('hex')
   const key = `ai-publicidade/covers/${stem}-${suffix}.${ext}`
 
-  const blob = await put(key, buf, {
-    access: 'public',
-    addRandomSuffix: false,
-    allowOverwrite: false,
-    contentType,
-  })
-
-  return NextResponse.json({ url: blob.url }, { status: 201 })
+  try {
+    const blob = await put(key, buf, {
+      access: 'public',
+      addRandomSuffix: false,
+      allowOverwrite: false,
+      contentType,
+    })
+    return NextResponse.json({ url: blob.url }, { status: 201 })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[upload-image] put failed:', msg)
+    return NextResponse.json({ error: msg, key }, { status: 500 })
+  }
 }
