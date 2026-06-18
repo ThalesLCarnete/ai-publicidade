@@ -47,6 +47,7 @@ const P_CLASSIFICADOR = systemPrompt('classificador.md')
 const P_HYPE = systemPrompt('tradutor-de-hype.md')
 let P_REDATOR = systemPrompt('redator-brief.md')
 const P_DIALETO_WA = systemPrompt('dialeto-whatsapp.md')
+const P_DIALETO_BLOG = systemPrompt('dialeto-blog.md')
 const P_EDITOR = systemPrompt('editor-cetico.md')
 
 // Injetar o corpus de voz (RAG de voz vira contexto direto). Sem posts → fallback.
@@ -318,13 +319,19 @@ return [{ json: { system, userMessage, noticias } }];`
 const nLlmRedator = llm('LLM · Redator do Brief', 2500)
 
 // 3.16 Parse brief + input dialeto
+// redator-brief.md retorna em tags XML (mesmo motivo do dialeto-whatsapp/editor-cético:
+// evitar JSON.parse com aspas internas mal escapadas no texto longo do brief_whatsapp).
 const nParseBrief = code(
   'Parse brief + input dialeto',
-  `${PJ}
-const brief = pj($json.content[0].text);
-const userMessage = 'BRIEF DO DIA (saída do redator):\\n<<<\\n' + brief.brief_whatsapp + '\\n>>>';
+  `const raw = String($json.content[0].text);
+const titulo_do_dia = ((raw.match(/<titulo_do_dia>([\\s\\S]*?)<\\/titulo_do_dia>/i) || [])[1] || '').trim();
+const brief_whatsapp = ((raw.match(/<brief_whatsapp>([\\s\\S]*?)<\\/brief_whatsapp>/i) || [])[1] || '').trim();
+const fontesRaw = (raw.match(/<fontes>([\\s\\S]*?)<\\/fontes>/i) || [])[1] || '';
+const fontes = fontesRaw.split('\\n').map((l) => l.replace(/^\\s*[-•*]\\s*/, '').trim()).filter((l) => /^https?:\\/\\//i.test(l));
+if (!brief_whatsapp) throw new Error('tag <brief_whatsapp> não encontrada ou vazia no output do redator');
+const userMessage = 'BRIEF DO DIA (saída do redator):\\n<<<\\n' + brief_whatsapp + '\\n>>>';
 const system = ${JSON.stringify(P_DIALETO_WA)};
-return [{ json: { system, userMessage, titulo_do_dia: brief.titulo_do_dia, fontes: brief.fontes || [], brief_original: brief.brief_whatsapp } }];`
+return [{ json: { system, userMessage, titulo_do_dia, fontes, brief_original: brief_whatsapp } }];`
 )
 
 // 3.17 LLM dialeto whatsapp
@@ -350,12 +357,18 @@ return [{ json: { system, userMessage, texto_final: texto_whatsapp, titulo_do_di
 const nLlmEditor = llm('LLM · Editor-Cético', 3000)
 
 // 3.20 Montar pacote (texto Telegram + payload do post)
+// editor-cetico.md retorna em tags XML simples (score/veredito/problemas) — mesmo motivo
+// do dialeto-whatsapp: evitar JSON.parse com aspas internas mal escapadas.
 const nPacote = code(
   'Montar pacote',
-  `${PJ}
-const SITE = ${JSON.stringify(SITE_URL)};
+  `const SITE = ${JSON.stringify(SITE_URL)};
 
-const ed = pj($json.content[0].text);
+const raw = String($json.content[0].text);
+const score = parseInt((raw.match(/<score>\\s*(\\d+)\\s*<\\/score>/i) || [])[1] || '0', 10);
+const veredito = ((raw.match(/<veredito>\\s*(\\w+)\\s*<\\/veredito>/i) || [])[1] || 'reescreve').toLowerCase();
+const probsRaw = (raw.match(/<problemas>([\\s\\S]*?)<\\/problemas>/i) || [])[1] || '';
+const problemas = probsRaw.split('\\n').map((l) => l.replace(/^\\s*[-•*]\\s*/, '').trim()).filter((l) => l && l.toLowerCase() !== 'nenhum');
+const ed = { score, veredito, problemas };
 const prev = $('Parse dialeto + input editor').first().json;
 const hoje = new Date().toISOString().slice(0, 10);
 const slug = String(prev.titulo_do_dia).toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')
@@ -412,11 +425,36 @@ const nIf = add({
 
 const xAfterIf = X
 
-// 3.23 (true) Montar post
-const nMontarPost = code(
-  'Montar post',
+// 3.23a (true) Montar input · dialeto blog
+// Passa o brief WhatsApp aprovado + trechos das fontes pro LLM expandir cada notícia
+// com base nas fontes (não inventar). As notícias com fonte_texto vieram do "Montar input · redator".
+const nInBlog = code(
+  'Montar input · blog',
   `const pkg = $('Montar pacote').first().json;
-return [{ json: { post: pkg.post, apiUrl: pkg.apiUrl } }];`,
+const noticias = $('Montar input · redator').first().json.noticias || [];
+const fontesTxt = noticias.map((n, i) =>
+  (i + 1) + '. [' + n.link + ']\\n' + String(n.fonte_texto || '(fonte não disponível)').slice(0, 2500)
+).join('\\n\\n');
+const userMessage = 'BRIEF APROVADO (formato WhatsApp):\\n<<<\\n' + pkg.post.content + '\\n>>>\\n\\nFONTES ORIGINAIS (matéria-prima para expandir as notícias do blog — use APENAS o que estiver aqui):\\n\\n' + fontesTxt;
+const system = ${JSON.stringify(P_DIALETO_BLOG)};
+return [{ json: { system, userMessage, _pkg: pkg } }];`,
+  { row: -1 }
+)
+
+// 3.23b (true) LLM dialeto blog (max_tokens 4000 — 3 notícias x ~400 palavras + lede + fontes)
+const nLlmBlog = llm('LLM · Dialeto Blog', 4000, { row: -1 })
+
+// 3.23c (true) Parse blog + montar post
+// dialeto-blog.md retorna em tag XML (mesmo motivo do dialeto-whatsapp: evitar JSON.parse com aspas).
+const nParseBlog = code(
+  'Parse blog + montar post',
+  `const raw = String($json.content[0].text);
+const m = raw.match(/<post_markdown>([\\s\\S]*?)<\\/post_markdown>/i);
+if (!m) throw new Error('tag <post_markdown> não encontrada no output do dialeto blog');
+const contentMarkdown = m[1].trim();
+const pkg = $('Montar input · blog').first().json._pkg;
+const post = { ...pkg.post, content: contentMarkdown };
+return [{ json: { post, apiUrl: pkg.apiUrl } }];`,
   { row: -1 }
 )
 
@@ -477,8 +515,10 @@ const chain = [
   nParseBrief, nLlmDialeto, nParseDialeto, nLlmEditor, nPacote, nApproval, nIf,
 ]
 for (let i = 0; i < chain.length - 1; i++) connect(chain[i], chain[i + 1])
-connect(nIf, nMontarPost, 0) // true
-connect(nMontarPost, nPublicar)
+connect(nIf, nInBlog, 0) // true
+connect(nInBlog, nLlmBlog)
+connect(nLlmBlog, nParseBlog)
+connect(nParseBlog, nPublicar)
 connect(nPublicar, nConfirma)
 connect(nIf, nDescarta, 1) // false
 

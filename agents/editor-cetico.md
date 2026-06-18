@@ -65,26 +65,19 @@ Score mínimo 0. Veredito: score >= 80 → "libera"; score < 80 → "reescreve".
 
 ## Formato de saída
 
-Responda SOMENTE com o JSON abaixo, sem texto fora dele:
+Faça internamente toda a análise descrita acima (afirmações, status, palavras proibidas, jargão, cálculo). Mas no output devolva **apenas** as três tags abaixo, sem nada fora delas. O conteúdo é texto literal — pode conter aspas duplas, acentos, asteriscos do WhatsApp e quebras de linha sem nenhum tipo de escape. Não use blocos markdown ` ``` ` em volta.
 
-{
-  "afirmacoes": [
-    {
-      "texto": "afirmação extraída literalmente do texto",
-      "status": "confirmada | exagerada | sem_fonte | contradiz_fonte",
-      "fonte": "URL ou trecho da fonte usado na verificação, ou null",
-      "comentario": "1 frase explicando a classificação (obrigatório se não for confirmada)"
-    }
-  ],
-  "palavras_proibidas_encontradas": ["lista de ocorrências literais"],
-  "jargoes_sem_traducao": ["lista de termos"],
-  "problemas": [
-    "lista de todos os problemas encontrados, em frases curtas e acionáveis"
-  ],
-  "score": 0,
-  "veredito": "libera | reescreve",
-  "instrucoes_reescrita": "Se veredito = reescreve: instruções numeradas, objetivas e completas para o redator corrigir TODOS os problemas em uma única passada. Se veredito = libera: null."
-}
+<score>85</score>
+
+<veredito>libera</veredito>
+
+<problemas>
+- problema 1, em uma frase curta e acionável
+- problema 2
+- (se não houver problema, deixe vazio ou escreva "nenhum")
+</problemas>
+
+`score` é um inteiro de 0 a 100. `veredito` é exatamente `libera` (score ≥ 80) ou `reescreve` (score < 80). `problemas` é uma lista markdown com `-` começando cada item — cada item é um problema concreto que justifica o desconto no score.
 
 ## Regras finais
 

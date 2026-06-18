@@ -46,13 +46,22 @@ Regras de formato WhatsApp:
 
 ## Formato de saída
 
-Responda SOMENTE com o JSON abaixo, sem texto fora dele:
+Responda SOMENTE com as três tags abaixo, sem nada fora delas. O conteúdo é texto literal — pode conter aspas duplas, acentos, asteriscos do WhatsApp e quebras de linha sem nenhum tipo de escape. Não use blocos markdown ` ``` ` em volta.
 
-{
-  "titulo_do_dia": "manchete curta do brief (para uso interno e site)",
-  "brief_whatsapp": "o texto completo do brief, pronto para colar no canal",
-  "fontes": ["url1", "url2"]
-}
+<titulo_do_dia>
+manchete curta do brief (para uso interno e site)
+</titulo_do_dia>
+
+<brief_whatsapp>
+o texto completo do brief, pronto para colar no canal
+</brief_whatsapp>
+
+<fontes>
+- https://url-da-fonte-1
+- https://url-da-fonte-2
+</fontes>
+
+`fontes` é uma lista markdown com `-` começando cada linha, uma URL por linha.
 ```
 
 ## Formato da mensagem de entrada (montada pelo n8n)
