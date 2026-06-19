@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { compileMDX } from 'next-mdx-remote/rsc'
 import { getPosts, getPostBySlug, getPostContent, formatDate } from '@/lib/posts'
+import { getVotes } from '@/lib/votes'
+import { VoteButton } from '@/components/VoteButton'
 import { useMDXComponents } from '@/mdx-components'
 
 export async function generateStaticParams() {
@@ -28,6 +30,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
 
   const components = useMDXComponents()
   const { content } = await compileMDX({ source, components })
+  const votes = await getVotes(slug)
 
   return (
     <>
@@ -115,6 +118,14 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
       <div className="max-w-5xl mx-auto px-6">
         <div className="max-w-2xl py-14">
           <article>{content}</article>
+
+          {/* ── Upvote ──────────────────────────────────────── */}
+          <div className="mt-12 pt-8 border-t border-ink/10 dark:border-white/10 flex items-center gap-4">
+            <VoteButton slug={slug} initial={votes} />
+            <span className="text-sm text-ink/45 dark:text-white/45">
+              Esse resumo foi útil? Vote pra ajudar a priorizar os próximos.
+            </span>
+          </div>
         </div>
       </div>
     </>

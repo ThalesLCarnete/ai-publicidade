@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getPosts, formatDate } from '@/lib/posts'
+import { getAllVotes } from '@/lib/votes'
 import { ArticleCard } from '@/components/ArticleCard'
 
 export const dynamic = 'force-dynamic'
@@ -12,6 +13,7 @@ const TICKER = [
 
 export default async function HomePage() {
   const posts = await getPosts()
+  const votes = await getAllVotes()
   const featured = posts.slice(0, 3)
   const older = posts.slice(3)
 
@@ -227,7 +229,7 @@ export default async function HomePage() {
             <div className="max-w-5xl mx-auto px-6 pb-24">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-ink/8 dark:bg-white/8 border border-ink/8 dark:border-white/8">
                 {older.map((post) => (
-                  <ArticleCard key={post.slug} post={post} />
+                  <ArticleCard key={post.slug} post={post} votes={votes[post.slug]} />
                 ))}
               </div>
             </div>

@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { Post } from '@/lib/posts'
 import { formatDate } from '@/lib/posts'
 
-export function ArticleCard({ post }: { post: Post }) {
+export function ArticleCard({ post, votes }: { post: Post; votes?: number }) {
   return (
     <Link
       href={`/posts/${post.slug}`}
@@ -39,10 +39,18 @@ export function ArticleCard({ post }: { post: Post }) {
         <time className="font-mono text-xs text-ink/25 dark:text-white/25 group-hover:text-white/35 transition-colors">
           {formatDate(post.date)}
         </time>
-        <span className="flex items-center gap-1.5 text-ink/30 dark:text-white/30 group-hover:text-y transition-colors font-bold text-sm tracking-wider">
-          LER
-          <span className="text-base leading-none">→</span>
-        </span>
+        <div className="flex items-center gap-3">
+          {votes ? (
+            <span className="flex items-center gap-1 text-ink/30 dark:text-white/30 group-hover:text-y transition-colors font-bold text-xs tabular-nums">
+              <span className="text-sm leading-none">▲</span>
+              {votes}
+            </span>
+          ) : null}
+          <span className="flex items-center gap-1.5 text-ink/30 dark:text-white/30 group-hover:text-y transition-colors font-bold text-sm tracking-wider">
+            LER
+            <span className="text-base leading-none">→</span>
+          </span>
+        </div>
       </div>
 
       {/* ── Bottom accent line ────────────────────────────── */}
