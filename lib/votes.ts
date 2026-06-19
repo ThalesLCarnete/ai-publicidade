@@ -6,7 +6,11 @@ import { put, list, get } from '@vercel/blob'
 
 const KEY = 'ai-publicidade/votes.json'
 
+// Evita list() (Advanced Operation): monta a URL fixa a partir de BLOB_BASE_URL.
+// Sem a env var, cai no list() antigo (compatível).
 async function findUrl(): Promise<string | null> {
+  const base = process.env.BLOB_BASE_URL
+  if (base) return `${base.replace(/\/$/, '')}/${KEY}`
   const { blobs } = await list({ prefix: 'ai-publicidade/votes' })
   return blobs[0]?.url ?? null
 }

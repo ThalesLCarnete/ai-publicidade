@@ -17,11 +17,13 @@ export async function GET(req: NextRequest) {
 
   const blobKey = `ai-publicidade/images/${seed}-${type}-${w}x${h}.jpg`
 
-  // Tentar cache no Blob privado
+  // Tentar cache no Blob privado. Sem list() (Advanced Operation): com a URL
+  // fixa (addRandomSuffix:false) tentamos o get() direto; 404 = cache miss.
+  const base = process.env.BLOB_BASE_URL
   try {
-    const { blobs } = await list({ prefix: blobKey })
-    if (blobs.length > 0) {
-      const cached = await get(blobs[0].url, { access: 'private', useCache: false })
+    const cacheUrl = base ? `${base.replace(/\/$/, '')}/${blobKey}` : (await list({ prefix: blobKey })).blobs[0]?.url
+    if (cacheUrl) {
+      const cached = await get(cacheUrl, { access: 'private', useCache: false })
       if (cached && cached.statusCode === 200) {
         const chunks: Uint8Array[] = []
         const reader = cached.stream.getReader()

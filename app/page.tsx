@@ -3,7 +3,9 @@ import { getPosts, formatDate } from '@/lib/posts'
 import { getAllVotes } from '@/lib/votes'
 import { ArticleCard } from '@/components/ArticleCard'
 
-export const dynamic = 'force-dynamic'
+// Revalida a cada 60s em vez de renderizar a cada request (corta leituras do Blob).
+// Posts novos do n8n aparecem em até 1 min.
+export const revalidate = 60
 
 const TICKER = [
   'GPT-5', 'GEMINI 2.5 PRO', 'CLAUDE OPUS', 'FLUX.1-SCHNELL', 'LLAMA 3',

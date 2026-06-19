@@ -9,7 +9,12 @@ const BLOB_KEY = 'ai-publicidade/posts-db.json'
 const MANIFEST = path.join(process.cwd(), 'content/posts/manifest.json')
 const CONTENT_DIR = path.join(process.cwd(), 'content/posts')
 
+// Evita list() (Advanced Operation, limite baixo no free tier): com
+// addRandomSuffix:false a URL é fixa, então a montamos a partir de BLOB_BASE_URL.
+// Sem a env var, cai no list() antigo (compatível).
 async function findBlobUrl(): Promise<string | null> {
+  const base = process.env.BLOB_BASE_URL
+  if (base) return `${base.replace(/\/$/, '')}/${BLOB_KEY}`
   const { blobs } = await list({ prefix: 'ai-publicidade/posts-db' })
   return blobs[0]?.url ?? null
 }
