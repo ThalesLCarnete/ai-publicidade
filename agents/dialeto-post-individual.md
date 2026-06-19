@@ -66,6 +66,8 @@ resumo de uma frase (máx 160 chars)
 o post completo em markdown, pronto pra salvar como content do MDX
 </post_markdown>
 
+**Importante:** o `post_markdown` é SÓ o corpo do post (lede + parágrafos + selo + "E eu com isso?" + Fonte). NÃO repita o título nem o excerpt dentro dele, NÃO escreva rótulos como "Excerpt:", "Título:" ou linhas `---` no início. O título e o excerpt já vão nas suas próprias tags acima.
+
 ## Formato da mensagem de entrada (montada pelo n8n)
 
 ```
