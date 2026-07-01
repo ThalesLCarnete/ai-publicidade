@@ -83,6 +83,26 @@ export async function blobCreatePost(post: PostWithContent) {
   await writeDB([post, ...posts])
 }
 
+// Cria vários posts numa única leitura+escrita do Blob. Evita a corrida de
+// read-modify-write quando o n8n publica N posts em sequência/paralelo (o que
+// fazia só o último sobreviver). Pula slugs que já existem. Preserva a ordem
+// recebida (o primeiro do array vira o mais recente).
+export async function blobCreateManyPosts(
+  newPosts: PostWithContent[],
+): Promise<{ created: number; slugs: string[] }> {
+  const posts = await readDB()
+  const existing = new Set(posts.map((p) => p.slug))
+  const toAdd: PostWithContent[] = []
+  for (const p of newPosts) {
+    if (!p?.slug || existing.has(p.slug)) continue
+    existing.add(p.slug)
+    toAdd.push(p)
+  }
+  if (toAdd.length === 0) return { created: 0, slugs: [] }
+  await writeDB([...toAdd, ...posts])
+  return { created: toAdd.length, slugs: toAdd.map((p) => p.slug) }
+}
+
 export async function blobUpdatePost(slug: string, data: Partial<PostWithContent>) {
   const posts = await readDB()
   const idx = posts.findIndex((p) => p.slug === slug)
