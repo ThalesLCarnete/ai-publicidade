@@ -114,8 +114,8 @@ function llm(name, maxTokens, { row = 0 } = {}) {
     parameters: {
       method: 'POST',
       url: 'https://api.anthropic.com/v1/messages',
-      authentication: 'genericCredentialType',
-      genericAuthType: 'httpHeaderAuth',
+      authentication: 'predefinedCredentialType',
+      nodeCredentialType: 'anthropicApi',
       sendHeaders: true,
       headerParameters: { parameters: [{ name: 'anthropic-version', value: '2023-06-01' }] },
       sendBody: true,
@@ -123,7 +123,7 @@ function llm(name, maxTokens, { row = 0 } = {}) {
       jsonBody: body,
       options: { timeout: 120000 },
     },
-    credentials: { httpHeaderAuth: { id: 'ANTHROPIC_KEY', name: 'Anthropic API key (x-api-key)' } },
+    credentials: { anthropicApi: { id: 'ANTHROPIC_ACCOUNT', name: 'Anthropic account' } },
   })
 }
 
@@ -552,10 +552,14 @@ const m = raw.match(/<post_markdown>([\\s\\S]*?)<\\/post_markdown>/i);
 if (m) {
   contentMarkdown = m[1].trim();
 } else {
-  // tag aberta mas não fechada (resposta truncada por max_tokens): aproveita o que veio
   const open = raw.match(/<post_markdown>([\\s\\S]*)/i);
-  if (!open) throw new Error('tag <post_markdown> não encontrada no output do dialeto blog');
-  contentMarkdown = open[1].replace(/<\\/post_markdown>\\s*$/i, '').trim();
+  if (open) {
+    // tag aberta e não fechada (truncado): aproveita o que veio
+    contentMarkdown = open[1].replace(/<\\/post_markdown>\\s*$/i, '').trim();
+  } else {
+    // o modelo ignorou o wrapper e mandou o markdown direto: usa o texto inteiro
+    contentMarkdown = raw.replace(/^\\s*\`\`\`(?:markdown)?\\s*/i, '').replace(/\`\`\`\\s*$/i, '').trim();
+  }
 }
 if (!contentMarkdown) throw new Error('<post_markdown> veio vazio no output do dialeto blog');
 const pkg = $('Montar input · blog').first().json._pkg;
@@ -660,7 +664,7 @@ nodes.push({
       '## Brief Diário — IA Traduzida (Pipeline 1)\\n' +
       'Gerado por `scripts/build-brief-diario.mjs` — não edite à mão; edite os prompts em `agents/*.md` e regenere.\\n\\n' +
       '**Antes de ativar, configure 3 credenciais** (ver docs/SETUP.md):\\n' +
-      '1. *Anthropic API key (x-api-key)* — HTTP Header Auth, header `x-api-key`.\\n' +
+      '1. *Anthropic account* — credencial predefinida **Anthropic API** (n8n injeta o x-api-key nos nós LLM).\\n' +
       '2. *IA Traduzida site* — HTTP Header Auth, header `Authorization` = `Bearer SEU_BLOG_API_TOKEN`.\\n' +
       '3. *IA Traduzida Bot* — credencial Telegram (token do BotFather).\\n\\n' +
       'URL do site e chat_id do Telegram entram no JSON via env vars do builder ' +

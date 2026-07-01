@@ -97,8 +97,8 @@
       "parameters": {
         "method": "POST",
         "url": "https://api.anthropic.com/v1/messages",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "anthropicApi",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -116,9 +116,9 @@
         }
       },
       "credentials": {
-        "httpHeaderAuth": {
-          "id": "ANTHROPIC_KEY",
-          "name": "Anthropic API key (x-api-key)"
+        "anthropicApi": {
+          "id": "ANTHROPIC_ACCOUNT",
+          "name": "Anthropic account"
         }
       }
     },
@@ -181,8 +181,8 @@
       "parameters": {
         "method": "POST",
         "url": "https://api.anthropic.com/v1/messages",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "anthropicApi",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -200,9 +200,9 @@
         }
       },
       "credentials": {
-        "httpHeaderAuth": {
-          "id": "ANTHROPIC_KEY",
-          "name": "Anthropic API key (x-api-key)"
+        "anthropicApi": {
+          "id": "ANTHROPIC_ACCOUNT",
+          "name": "Anthropic account"
         }
       }
     },
@@ -243,8 +243,8 @@
       "parameters": {
         "method": "POST",
         "url": "https://api.anthropic.com/v1/messages",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "anthropicApi",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -262,9 +262,9 @@
         }
       },
       "credentials": {
-        "httpHeaderAuth": {
-          "id": "ANTHROPIC_KEY",
-          "name": "Anthropic API key (x-api-key)"
+        "anthropicApi": {
+          "id": "ANTHROPIC_ACCOUNT",
+          "name": "Anthropic account"
         }
       }
     },
@@ -365,8 +365,8 @@
       "parameters": {
         "method": "POST",
         "url": "https://api.anthropic.com/v1/messages",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "anthropicApi",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -384,9 +384,9 @@
         }
       },
       "credentials": {
-        "httpHeaderAuth": {
-          "id": "ANTHROPIC_KEY",
-          "name": "Anthropic API key (x-api-key)"
+        "anthropicApi": {
+          "id": "ANTHROPIC_ACCOUNT",
+          "name": "Anthropic account"
         }
       }
     },
@@ -414,8 +414,8 @@
       "parameters": {
         "method": "POST",
         "url": "https://api.anthropic.com/v1/messages",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "anthropicApi",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -433,9 +433,9 @@
         }
       },
       "credentials": {
-        "httpHeaderAuth": {
-          "id": "ANTHROPIC_KEY",
-          "name": "Anthropic API key (x-api-key)"
+        "anthropicApi": {
+          "id": "ANTHROPIC_ACCOUNT",
+          "name": "Anthropic account"
         }
       }
     },
@@ -463,8 +463,8 @@
       "parameters": {
         "method": "POST",
         "url": "https://api.anthropic.com/v1/messages",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "anthropicApi",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -482,9 +482,9 @@
         }
       },
       "credentials": {
-        "httpHeaderAuth": {
-          "id": "ANTHROPIC_KEY",
-          "name": "Anthropic API key (x-api-key)"
+        "anthropicApi": {
+          "id": "ANTHROPIC_ACCOUNT",
+          "name": "Anthropic account"
         }
       }
     },
@@ -584,8 +584,8 @@
       "parameters": {
         "method": "POST",
         "url": "https://api.anthropic.com/v1/messages",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "anthropicApi",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -603,9 +603,9 @@
         }
       },
       "credentials": {
-        "httpHeaderAuth": {
-          "id": "ANTHROPIC_KEY",
-          "name": "Anthropic API key (x-api-key)"
+        "anthropicApi": {
+          "id": "ANTHROPIC_ACCOUNT",
+          "name": "Anthropic account"
         }
       }
     },
@@ -619,7 +619,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const raw = String($json.content[0].text);\nlet contentMarkdown;\nconst m = raw.match(/<post_markdown>([\\s\\S]*?)<\\/post_markdown>/i);\nif (m) {\n  contentMarkdown = m[1].trim();\n} else {\n  // tag aberta mas não fechada (resposta truncada por max_tokens): aproveita o que veio\n  const open = raw.match(/<post_markdown>([\\s\\S]*)/i);\n  if (!open) throw new Error('tag <post_markdown> não encontrada no output do dialeto blog');\n  contentMarkdown = open[1].replace(/<\\/post_markdown>\\s*$/i, '').trim();\n}\nif (!contentMarkdown) throw new Error('<post_markdown> veio vazio no output do dialeto blog');\nconst pkg = $('Montar input · blog').first().json._pkg;\nconst post = { ...pkg.post, content: contentMarkdown };\nreturn [{ json: { post, apiUrl: pkg.apiUrl } }];"
+        "jsCode": "const raw = String($json.content[0].text);\nlet contentMarkdown;\nconst m = raw.match(/<post_markdown>([\\s\\S]*?)<\\/post_markdown>/i);\nif (m) {\n  contentMarkdown = m[1].trim();\n} else {\n  const open = raw.match(/<post_markdown>([\\s\\S]*)/i);\n  if (open) {\n    // tag aberta e não fechada (truncado): aproveita o que veio\n    contentMarkdown = open[1].replace(/<\\/post_markdown>\\s*$/i, '').trim();\n  } else {\n    // o modelo ignorou o wrapper e mandou o markdown direto: usa o texto inteiro\n    contentMarkdown = raw.replace(/^\\s*```(?:markdown)?\\s*/i, '').replace(/```\\s*$/i, '').trim();\n  }\n}\nif (!contentMarkdown) throw new Error('<post_markdown> veio vazio no output do dialeto blog');\nconst pkg = $('Montar input · blog').first().json._pkg;\nconst post = { ...pkg.post, content: contentMarkdown };\nreturn [{ json: { post, apiUrl: pkg.apiUrl } }];"
       }
     },
     {
@@ -700,7 +700,7 @@
       "parameters": {
         "width": 520,
         "height": 260,
-        "content": "## Brief Diário — IA Traduzida (Pipeline 1)\\nGerado por `scripts/build-brief-diario.mjs` — não edite à mão; edite os prompts em `agents/*.md` e regenere.\\n\\n**Antes de ativar, configure 3 credenciais** (ver docs/SETUP.md):\\n1. *Anthropic API key (x-api-key)* — HTTP Header Auth, header `x-api-key`.\\n2. *IA Traduzida site* — HTTP Header Auth, header `Authorization` = `Bearer SEU_BLOG_API_TOKEN`.\\n3. *IA Traduzida Bot* — credencial Telegram (token do BotFather).\\n\\nURL do site e chat_id do Telegram entram no JSON via env vars do builder (`IA_TRADUZIDA_SITE_URL`, `IA_TRADUZIDA_CHAT_ID`); se o JSON foi gerado sem elas, edite manualmente os 3 `REPLACE_CHAT_ID` e o `SITE` no nó \"Montar pacote\"."
+        "content": "## Brief Diário — IA Traduzida (Pipeline 1)\\nGerado por `scripts/build-brief-diario.mjs` — não edite à mão; edite os prompts em `agents/*.md` e regenere.\\n\\n**Antes de ativar, configure 3 credenciais** (ver docs/SETUP.md):\\n1. *Anthropic account* — credencial predefinida **Anthropic API** (n8n injeta o x-api-key nos nós LLM).\\n2. *IA Traduzida site* — HTTP Header Auth, header `Authorization` = `Bearer SEU_BLOG_API_TOKEN`.\\n3. *IA Traduzida Bot* — credencial Telegram (token do BotFather).\\n\\nURL do site e chat_id do Telegram entram no JSON via env vars do builder (`IA_TRADUZIDA_SITE_URL`, `IA_TRADUZIDA_CHAT_ID`); se o JSON foi gerado sem elas, edite manualmente os 3 `REPLACE_CHAT_ID` e o `SITE` no nó \"Montar pacote\"."
       }
     },
     {
@@ -1090,6 +1090,6 @@
   },
   "meta": {
     "generatedBy": "scripts/build-brief-diario.mjs",
-    "generatedAt": "2026-07-01T13:33:54.494Z"
+    "generatedAt": "2026-07-01T13:41:22.368Z"
   }
 }
