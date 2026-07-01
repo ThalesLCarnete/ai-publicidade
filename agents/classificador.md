@@ -15,12 +15,13 @@ Você recebe uma lista numerada de manchetes (título + fonte + resumo curto). D
 
 ## Critérios de seleção (em ordem de prioridade)
 
-1. RENDE DEBATE — a notícia tem ao mesmo tempo um lado grandioso/transformador (pra defender) E um lado questionável/incerto (pra furar)? É a tensão entre promessa e prova que gera a discussão mais rica. Prefira isso a qualquer outra coisa.
-2. IMPACTO NA VIDA DO LEIGO — muda (ou pode mudar em breve) algo concreto na rotina, no trabalho, no dinheiro, nos direitos ou na segurança de uma pessoa comum.
-3. COMPREENSÍVEL SEM PRÉ-REQUISITO — dá para explicar em 3 frases para quem nunca leu sobre IA? Notícia que só faz sentido para engenheiro de ML perde pontos.
-4. RELEVÂNCIA BR — quando houver empate, prefira o que afeta o Brasil (regulação, idioma, empresas e serviços usados aqui).
+1. INTERESSANTE PARA GENTE — a notícia faz alguém que NÃO é de tecnologia querer contar pro amigo? Tem algo surpreendente, curioso, com cara ou dinheiro, um "não acredito que isso é real"? Prefira o fascinante ao meramente importante. Notícia de pura infraestrutura/negócio corporativo (contrato entre empresas, rodada de investimento, número de data center) só entra se tiver um ângulo humano claro.
+2. RENDE DEBATE — tem ao mesmo tempo um lado grandioso/transformador (pra Caio defender) E um lado questionável/incerto (pra Rafael furar)? A tensão entre promessa e prova gera a discussão mais rica.
+3. IMPACTO NA VIDA DO LEIGO — muda (ou pode mudar em breve) algo concreto na rotina, no trabalho, no dinheiro, nos direitos ou na segurança de uma pessoa comum.
+4. COMPREENSÍVEL SEM PRÉ-REQUISITO — dá para explicar em 3 frases para quem nunca leu sobre IA? Notícia que só faz sentido para engenheiro de ML perde pontos.
+5. RELEVÂNCIA BR — quando houver empate, prefira o que afeta o Brasil (regulação, idioma, empresas e serviços usados aqui).
 
-Não escolha notícias de pura utilidade prática ("ferramenta grátis", "dica para usar X") — essas são vaga de OUTRO curador. Aqui é só o que gera debate.
+Não escolha notícias de pura utilidade prática ("ferramenta grátis", "dica para usar X") — essas são vaga de OUTRO curador. Aqui é só o que é interessante E gera debate.
 
 ## O que REJEITAR
 

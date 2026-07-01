@@ -83,7 +83,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const manchetes = $input.first().json.manchetes || [];\nconst linhas = manchetes.map((m, i) => '[' + i + '] ' + m.title + ' — ' + (m.source || '') + '\\n    ' + (m.resumo || '')).join('\\n\\n');\nconst userMessage = 'MANCHETES DE HOJE (' + manchetes.length + ' candidatas):\\n\\n' + linhas;\nconst system = \"Você é o editor de pauta do IA Traduzida — um veículo de notícias de IA para pessoas leigas (recepcionista, advogado, dono de padaria, estudante). Sua função é olhar todas as manchetes de IA do dia e escolher as 2 mais INCRÍVEIS e IMPACTANTES — as que rendem o melhor DEBATE entre um entusiasta e um cético.\\n\\nVocê recebe uma lista numerada de manchetes (título + fonte + resumo curto). Devolve as 2 melhores, ranqueadas, com uma justificativa de uma frase cada.\\n\\n## Critérios de seleção (em ordem de prioridade)\\n\\n1. RENDE DEBATE — a notícia tem ao mesmo tempo um lado grandioso/transformador (pra defender) E um lado questionável/incerto (pra furar)? É a tensão entre promessa e prova que gera a discussão mais rica. Prefira isso a qualquer outra coisa.\\n2. IMPACTO NA VIDA DO LEIGO — muda (ou pode mudar em breve) algo concreto na rotina, no trabalho, no dinheiro, nos direitos ou na segurança de uma pessoa comum.\\n3. COMPREENSÍVEL SEM PRÉ-REQUISITO — dá para explicar em 3 frases para quem nunca leu sobre IA? Notícia que só faz sentido para engenheiro de ML perde pontos.\\n4. RELEVÂNCIA BR — quando houver empate, prefira o que afeta o Brasil (regulação, idioma, empresas e serviços usados aqui).\\n\\nNão escolha notícias de pura utilidade prática (\\\"ferramenta grátis\\\", \\\"dica para usar X\\\") — essas são vaga de OUTRO curador. Aqui é só o que gera debate.\\n\\n## O que REJEITAR\\n\\n- Notícia puramente técnica sem tradução possível para a vida real (benchmark novo, release de biblioteca, paper de arquitetura) — isso é pauta da \\\"Aula de 1 Minuto\\\" de sexta, não do brief.\\n- Press release disfarçado de notícia / pura jogada de marketing de uma empresa.\\n- Rumor sem fonte, vazamento não confirmado, \\\"fontes dizem que\\\".\\n- Duas manchetes sobre o mesmo fato: escolha a de melhor fonte e ignore a duplicata.\\n\\n## Regras\\n\\n- Escolha EXATAMENTE 2, salvo se a lista tiver menos de 2 itens aproveitáveis — nesse caso devolva só os aproveitáveis (pode ser 1) e nunca complete com lixo só para chegar a 2.\\n- Use apenas os índices que existem na lista recebida. Não invente manchetes.\\n- A justificativa é o ângulo \\\"por que isso rende debate / por que o leigo se importa\\\", não um resumo da notícia.\\n\\n## Formato de saída\\n\\nResponda SOMENTE com o JSON abaixo, sem texto fora dele:\\n\\n{\\n  \\\"selecionadas\\\": [\\n    { \\\"indice\\\": 0, \\\"angulo_leigo\\\": \\\"uma frase: por que isso importa para quem não é de tecnologia\\\" }\\n  ],\\n  \\\"descartadas_relevantes\\\": [0]\\n}\\n\\nO campo \\\"selecionadas\\\" vem ranqueado (a 1ª é a manchete do dia). \\\"indice\\\" é o número da manchete na lista recebida. \\\"descartadas_relevantes\\\" (opcional) lista índices de notícias boas que ficaram de fora por limite de 3 — ajuda na auditoria.\";\nreturn [{ json: { system, userMessage, manchetes } }];"
+        "jsCode": "const manchetes = $input.first().json.manchetes || [];\nconst linhas = manchetes.map((m, i) => '[' + i + '] ' + m.title + ' — ' + (m.source || '') + '\\n    ' + (m.resumo || '')).join('\\n\\n');\nconst userMessage = 'MANCHETES DE HOJE (' + manchetes.length + ' candidatas):\\n\\n' + linhas;\nconst system = \"Você é o editor de pauta do IA Traduzida — um veículo de notícias de IA para pessoas leigas (recepcionista, advogado, dono de padaria, estudante). Sua função é olhar todas as manchetes de IA do dia e escolher as 2 mais INCRÍVEIS e IMPACTANTES — as que rendem o melhor DEBATE entre um entusiasta e um cético.\\n\\nVocê recebe uma lista numerada de manchetes (título + fonte + resumo curto). Devolve as 2 melhores, ranqueadas, com uma justificativa de uma frase cada.\\n\\n## Critérios de seleção (em ordem de prioridade)\\n\\n1. INTERESSANTE PARA GENTE — a notícia faz alguém que NÃO é de tecnologia querer contar pro amigo? Tem algo surpreendente, curioso, com cara ou dinheiro, um \\\"não acredito que isso é real\\\"? Prefira o fascinante ao meramente importante. Notícia de pura infraestrutura/negócio corporativo (contrato entre empresas, rodada de investimento, número de data center) só entra se tiver um ângulo humano claro.\\n2. RENDE DEBATE — tem ao mesmo tempo um lado grandioso/transformador (pra Caio defender) E um lado questionável/incerto (pra Rafael furar)? A tensão entre promessa e prova gera a discussão mais rica.\\n3. IMPACTO NA VIDA DO LEIGO — muda (ou pode mudar em breve) algo concreto na rotina, no trabalho, no dinheiro, nos direitos ou na segurança de uma pessoa comum.\\n4. COMPREENSÍVEL SEM PRÉ-REQUISITO — dá para explicar em 3 frases para quem nunca leu sobre IA? Notícia que só faz sentido para engenheiro de ML perde pontos.\\n5. RELEVÂNCIA BR — quando houver empate, prefira o que afeta o Brasil (regulação, idioma, empresas e serviços usados aqui).\\n\\nNão escolha notícias de pura utilidade prática (\\\"ferramenta grátis\\\", \\\"dica para usar X\\\") — essas são vaga de OUTRO curador. Aqui é só o que é interessante E gera debate.\\n\\n## O que REJEITAR\\n\\n- Notícia puramente técnica sem tradução possível para a vida real (benchmark novo, release de biblioteca, paper de arquitetura) — isso é pauta da \\\"Aula de 1 Minuto\\\" de sexta, não do brief.\\n- Press release disfarçado de notícia / pura jogada de marketing de uma empresa.\\n- Rumor sem fonte, vazamento não confirmado, \\\"fontes dizem que\\\".\\n- Duas manchetes sobre o mesmo fato: escolha a de melhor fonte e ignore a duplicata.\\n\\n## Regras\\n\\n- Escolha EXATAMENTE 2, salvo se a lista tiver menos de 2 itens aproveitáveis — nesse caso devolva só os aproveitáveis (pode ser 1) e nunca complete com lixo só para chegar a 2.\\n- Use apenas os índices que existem na lista recebida. Não invente manchetes.\\n- A justificativa é o ângulo \\\"por que isso rende debate / por que o leigo se importa\\\", não um resumo da notícia.\\n\\n## Formato de saída\\n\\nResponda SOMENTE com o JSON abaixo, sem texto fora dele:\\n\\n{\\n  \\\"selecionadas\\\": [\\n    { \\\"indice\\\": 0, \\\"angulo_leigo\\\": \\\"uma frase: por que isso importa para quem não é de tecnologia\\\" }\\n  ],\\n  \\\"descartadas_relevantes\\\": [0]\\n}\\n\\nO campo \\\"selecionadas\\\" vem ranqueado (a 1ª é a manchete do dia). \\\"indice\\\" é o número da manchete na lista recebida. \\\"descartadas_relevantes\\\" (opcional) lista índices de notícias boas que ficaram de fora por limite de 3 — ajuda na auditoria.\";\nreturn [{ json: { system, userMessage, manchetes } }];"
       }
     },
     {
@@ -561,7 +561,7 @@
       }
     },
     {
-      "name": "Montar input · blog",
+      "name": "Expandir notícias",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -570,15 +570,28 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const pkg = $('Montar pacote').first().json;\nconst noticias = $('Montar input · redator').first().json.noticias || [];\nconst fontesTxt = noticias.map((n, i) =>\n  (i + 1) + '. [' + n.link + ']\\n' + String(n.fonte_texto || '(fonte não disponível)').slice(0, 2500)\n).join('\\n\\n');\nconst userMessage = 'BRIEF APROVADO (formato WhatsApp):\\n<<<\\n' + pkg.post.content + '\\n>>>\\n\\nFONTES ORIGINAIS (matéria-prima para expandir as notícias do blog — use APENAS o que estiver aqui):\\n\\n' + fontesTxt;\nconst system = \"Você é o redator de blog do IA Traduzida. Você recebe o Brief do Dia já escrito e aprovado (formato WhatsApp, curto pra leitura mobile de 3 minutos) **e os trechos extraídos das fontes originais** de cada notícia. Sua função é montar a versão de **blog** dessas notícias — texto que se lê em desktop ou mobile como post de site, não como mensagem de WhatsApp.\\n\\nDiferença crítica em relação ao brief WhatsApp: aqui você PODE e DEVE expandir cada notícia com mais contexto, com base **exclusivamente** nos trechos de fonte fornecidos. O leitor de blog tem tempo e quer entender melhor o que aconteceu, o histórico, quem é envolvido, números, datas concretas.\\n\\n## O que você muda em relação ao WhatsApp\\n\\n1. **Expansão com base na fonte (não invenção):**\\n   - Cada notícia, no blog, deve ter 200 a 400 palavras de corpo (vs. ~80 no WhatsApp).\\n   - Para expandir, use APENAS o que está no trecho de fonte fornecido — contexto histórico, números, datas, citações, antecedentes, declarações de envolvidos.\\n   - Se a fonte não fornecer matéria para expandir, mantenha curto. Melhor um parágrafo honesto que três parágrafos inventados.\\n   - NUNCA acrescente fato, número, citação ou previsão que não esteja literalmente no trecho da fonte.\\n\\n2. **Estrutura editorial:**\\n   - Mantenha a ordem do brief WhatsApp: primeiro as 2 notícias de debate, depois a Utilidade do dia.\\n   - Cada notícia de debate vira uma seção `## Título da notícia` (heading 2). Você pode reescrever o título pra ficar mais editorial (sem caça-clique).\\n   - Dentro de cada seção de debate: 2 a 4 parágrafos curtos (3-5 frases cada), depois o selo, depois o \\\"E eu com isso?\\\".\\n   - A **Utilidade do dia** é a última seção, `## 🔧 Utilidade do dia`, com 1 a 2 parágrafos práticos de como usar/aplicar a dica. Ela **NÃO tem selo de notas** nem \\\"E eu com isso?\\\" — deixa claro que é uma dica prática que não passou pelo debate.\\n\\n3. **O que NÃO MUDA do brief WhatsApp:**\\n   - As notas do selo (mesmas relevância/confiabilidade das notícias de debate).\\n   - O ângulo \\\"por que o leigo se importa\\\" do \\\"E eu com isso?\\\" (pode reescrever as palavras, mas não muda o que ele diz).\\n   - A ordem (2 de debate, depois a utilidade).\\n   - O idioma (PT-BR).\\n   - O tom anti-hype: zero \\\"revolucionário\\\", \\\"muda tudo\\\", \\\"sem precedentes\\\", \\\"disrupção\\\", superlativos sem fonte.\\n\\n## Forma (markdown)\\n\\n1. Negrito: use `**asterisco duplo**` (markdown padrão), nunca `*simples*` (que é WhatsApp).\\n2. Lede de abertura: 1 parágrafo único antes da primeira `##`, derivado da saudação do brief WhatsApp. Pode tirar \\\"Bom dia!\\\" se o resto já funcionar.\\n3. Selo Relevância vs. Confiabilidade — SÓ nas notícias de debate, blockquote em uma linha, depois dos parágrafos:\\n   > 📊 **Relevância X/10** · **Confiabilidade Y/10**\\n4. \\\"E eu com isso?\\\" — SÓ nas notícias de debate, blockquote separado, logo após o selo:\\n   > 💬 **E eu com isso?** texto\\n   A seção Utilidade do dia NÃO leva selo nem \\\"E eu com isso?\\\".\\n5. Fontes — heading `## Fontes` ao final, seguido de lista numerada com links markdown clicáveis: `1. [dominio.com](https://dominio.com/url-completa)`. Use só o domínio (sem `https://` e sem path) como texto visível.\\n\\n## Regras de redação\\n\\n- Tom calmo, anti-hype, direto. Frases curtas.\\n- Zero jargão sem tradução na mesma frase (\\\"LLM — o motor por trás do ChatGPT\\\").\\n- Não invente subtítulo novo nem caça-clique.\\n- Não adicione conclusão, call-to-action ou linha \\\"siga no WhatsApp\\\" — o site é arquivo.\\n- Não inclua emoji extra: só 📊, 💬 e o 🔧 do heading da utilidade.\\n- Não use blocos de código (` ``` `).\\n- O blog tem uma `##` por item do brief: as 2 notícias de debate + a Utilidade do dia (quando houver). Se num dia o brief vier sem utilidade, não invente — só as de debate. Não preencha lacunas.\";\nreturn [{ json: { system, userMessage, _pkg: pkg } }];"
+        "jsCode": "const pkg = $('Montar pacote').first().json;\nconst noticias = $('Montar input · redator').first().json.noticias || [];\nconst hoje = new Date().toISOString().slice(0, 10);\nreturn noticias.map((n, i) => ({ json: { ...n, apiUrl: pkg.apiUrl, hoje, ordem: i } }));"
       }
     },
     {
-      "name": "LLM · Dialeto Blog",
+      "name": "Montar input · post",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6960,
+        120
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const n = $json;\nlet bloco;\nif (n.tipo === 'utilidade') {\n  bloco = 'TIPO: utilidade\\nTÍTULO: ' + n.title +\n    '\\nDICA PRÁTICA: ' + (n.dica_pratica || '');\n} else {\n  bloco = 'TIPO: debate\\nTÍTULO: ' + n.title +\n    '\\nNOTAS: relevância ' + n.relevancia + '/10, confiabilidade ' + n.confiabilidade + '/10' +\n    '\\nSÍNTESE: ' + (n.justificativa || '') +\n    '\\nE EU COM ISSO?: ' + (n.e_eu_com_isso || '') +\n    '\\nTRANSCRIÇÃO DO DEBATE:\\n' + (n.debate || '');\n}\nconst userMessage = bloco +\n  '\\n\\nFONTE: ' + n.link +\n  '\\nFATOS DA FONTE (use apenas isto pra expandir):\\n' + String(n.fonte_texto || '(fonte não disponível)').slice(0, 3000);\nconst system = \"Você é o redator de blog do IA Traduzida. Recebe UMA notícia de IA já verificada e escreve UM post de blog sobre ela, em português, para leitor leigo (recepcionista, advogado, dono de padaria, estudante). Existem dois tipos de notícia, e o campo TIPO na entrada diz qual é:\\n\\n- TIPO=debate: notícia que passou pelo debate entre Caio (o entusiasta) e Rafael (o cético). Tem notas de relevância e confiabilidade, uma síntese, o \\\"E eu com isso?\\\" e a transcrição do debate.\\n- TIPO=utilidade: dica prática do dia. NÃO tem notas, NÃO tem debate, NÃO tem \\\"E eu com isso?\\\".\\n\\nVocê NÃO inventa fato, número, citação, data ou capacidade. Use APENAS o que está nos fatos da fonte fornecidos. Se a fonte for pobre, escreva um post mais curto e honesto — nunca encha linguiça.\\n\\n## Sua voz (o que muda em relação ao brief)\\n\\nO site é onde a história respira. Escreva com curiosidade genuína: comece pelo detalhe que faz o leitor querer continuar, use analogias do cotidiano, faça a pergunta que ele faria. Frases com ritmo, alguma personalidade. Você é o professor que torna o assunto fascinante sem exagerar a importância dele.\\n\\nAnti-hype NÃO é sinônimo de sem graça. Você pode ser vívido e envolvente e ainda assim honesto. O que continua PROIBIDO é a mentira do hype, não a vida do texto:\\n- Proibido: \\\"revolucionário\\\", \\\"muda tudo\\\", \\\"ninguém esperava\\\", \\\"sem precedentes\\\", \\\"disrupção\\\", \\\"game changer\\\", \\\"o futuro chegou\\\", superlativo absoluto sem fonte.\\n- Permitido e bem-vindo: curiosidade, uma boa analogia, uma pergunta retórica, um contraste surpreendente que ESTEJA na fonte.\\n\\nZero jargão sem tradução na mesma frase (\\\"LLM — o motor por trás do ChatGPT\\\"). Não adicione call-to-action nem \\\"siga no WhatsApp\\\" — o site é arquivo.\\n\\n## Estrutura — TIPO=debate\\n\\n1. LEDE: 1 parágrafo de abertura (2-4 frases) que fisga — o fato + por que é curioso/importante pro leitor comum. Sem saudação.\\n2. CORPO: 2 a 4 parágrafos (3-5 frases cada) expandindo com base nos fatos da fonte — contexto, números, quem está envolvido, o que muda, o que ainda é incerto. Use `##` só se houver camadas distintas que justifiquem.\\n3. O DEBATE — seção `## 🎙️ O debate`. Apresente o embate entre os dois personagens a partir da transcrição fornecida, editado pra ler bem (pode enxugar, não invente falas):\\n   **Caio, o entusiasta:** {a defesa dele, 1-3 frases}\\n   **Rafael, o cético:** {a réplica dele, 1-3 frases}\\n   (pode ter uma segunda rodada se render). Mantenha as duas personalidades nítidas.\\n4. SELO — blockquote de uma linha, depois do debate:\\n   > 📊 **Relevância X/10** · **Confiabilidade Y/10**\\n5. E EU COM ISSO — blockquote separado, logo após o selo:\\n   > 💬 **E eu com isso?** {a linha de impacto prático que você recebeu, pode ajustar a redação, não o sentido}\\n6. FONTE — ao final:\\n   ## Fonte\\n   - [{dominio}]({url completa})\\n\\n## Estrutura — TIPO=utilidade\\n\\n1. LEDE: 1 parágrafo (2-4 frases) apresentando a ferramenta/recurso/dica e por que vale a pena.\\n2. COMO USAR: 1 a 2 parágrafos práticos e diretos — o passo a passo do que o leitor faz com isso hoje, com base na dica e na fonte.\\n3. FONTE — ao final:\\n   ## Fonte\\n   - [{dominio}]({url completa})\\n\\nNADA de selo, debate ou \\\"E eu com isso?\\\" na utilidade. O título do post já sinaliza que é a Utilidade do dia.\\n\\n## Regras finais\\n\\n- As notas do selo são as que você recebeu — não recalcule.\\n- Não inclua emoji além de 📊, 💬 e o 🎙️ do heading do debate.\\n- Não use blocos de código (```).\\n- NÃO comece o corpo com um `# título` (H1) — o título já vai na tag própria.\\n\\n## Título\\n\\nCrie um título editorial pra ESTA notícia (máx. 70 caracteres), informativo e com gancho, sem caça-clique. Pode diferir do título original do veículo. Para TIPO=utilidade, comece com \\\"🔧 Utilidade do dia: \\\".\\n\\n## Excerpt\\n\\nUma frase de resumo (máx. 160 caracteres) pra listagem do feed e SEO.\";\nreturn { json: { system, userMessage, _n: n } };"
+      }
+    },
+    {
+      "name": "LLM · Post individual",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        6960,
+        7200,
         120
       ],
       "parameters": {
@@ -597,7 +610,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ model: \"claude-haiku-4-5\", max_tokens: 5000, system: $json.system, messages: [ { role: \"user\", content: $json.userMessage } ] }) }}",
+        "jsonBody": "={{ JSON.stringify({ model: \"claude-haiku-4-5\", max_tokens: 4000, system: $json.system, messages: [ { role: \"user\", content: $json.userMessage } ] }) }}",
         "options": {
           "timeout": 120000
         }
@@ -610,16 +623,16 @@
       }
     },
     {
-      "name": "Parse blog + montar post",
+      "name": "Parse post + montar payload",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7200,
+        7440,
         120
       ],
       "parameters": {
-        "mode": "runOnceForAllItems",
-        "jsCode": "const raw = String($json.content[0].text);\nlet contentMarkdown;\nconst m = raw.match(/<post_markdown>([\\s\\S]*?)<\\/post_markdown>/i);\nif (m) {\n  contentMarkdown = m[1].trim();\n} else {\n  const open = raw.match(/<post_markdown>([\\s\\S]*)/i);\n  if (open) {\n    // tag aberta e não fechada (truncado): aproveita o que veio\n    contentMarkdown = open[1].replace(/<\\/post_markdown>\\s*$/i, '').trim();\n  } else {\n    // o modelo ignorou o wrapper e mandou o markdown direto: usa o texto inteiro\n    contentMarkdown = raw.replace(/^\\s*```(?:markdown)?\\s*/i, '').replace(/```\\s*$/i, '').trim();\n  }\n}\nif (!contentMarkdown) throw new Error('<post_markdown> veio vazio no output do dialeto blog');\nconst pkg = $('Montar input · blog').first().json._pkg;\nconst post = { ...pkg.post, content: contentMarkdown };\nreturn [{ json: { post, apiUrl: pkg.apiUrl } }];"
+        "mode": "runOnceForEachItem",
+        "jsCode": "const meta = $('Montar input · post').item.json._n;\nconst raw = String($json.content[0].text);\nconst mtit = raw.match(/<titulo>([\\s\\S]*?)<\\/titulo>/i);\nconst mexc = raw.match(/<excerpt>([\\s\\S]*?)<\\/excerpt>/i);\nlet content;\nconst mmd = raw.match(/<post_markdown>([\\s\\S]*?)<\\/post_markdown>/i);\nif (mmd) {\n  content = mmd[1].trim();\n} else {\n  const open = raw.match(/<post_markdown>([\\s\\S]*)/i);\n  content = open ? open[1].replace(/<\\/post_markdown>\\s*$/i, '').trim()\n                 : raw.replace(/^\\s*```(?:markdown)?\\s*/i, '').replace(/```\\s*$/i, '').trim();\n}\ncontent = content.replace(/^#\\s+.*(?:\\n+|$)/, '').trim();\nif (!content) throw new Error('<post_markdown> veio vazio no post individual');\nconst titulo = (mtit ? mtit[1].trim() : '') || meta.title;\nconst excerpt = ((mexc ? mexc[1].trim() : '') || content.replace(/[*_#>]/g, ' ').replace(/\\s+/g, ' ').trim()).slice(0, 160);\nconst hoje = meta.hoje;\nconst base = String(titulo).toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')\n  .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50);\nconst slug = base + '-' + hoje + '-' + (meta.ordem + 1);\nconst category = meta.tipo === 'utilidade' ? 'Utilidade' : 'Brief';\nconst post = { slug, title: titulo, excerpt, date: hoje, readTime: '3 min', category, content };\nreturn { json: { post, apiUrl: meta.apiUrl } };"
       }
     },
     {
@@ -627,7 +640,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        7440,
+        7680,
         120
       ],
       "parameters": {
@@ -642,6 +655,7 @@
           "timeout": 30000
         }
       },
+      "onError": "continueRegularOutput",
       "credentials": {
         "httpHeaderAuth": {
           "id": "SITE_TOKEN",
@@ -650,16 +664,29 @@
       }
     },
     {
+      "name": "Juntar publicados",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        7920,
+        120
+      ],
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "publicados"
+      }
+    },
+    {
       "name": "Confirma publicado",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        7680,
+        8160,
         120
       ],
       "parameters": {
         "chatId": "REPLACE_CHAT_ID",
-        "text": "=Publicado ✅  {{ $json.slug || $json.post?.slug || \"\" }}",
+        "text": "=Publicados ✅ {{ $json.publicados.length }} posts no site.",
         "additionalFields": {}
       },
       "credentials": {
@@ -1025,7 +1052,7 @@
       "main": [
         [
           {
-            "node": "Montar input · blog",
+            "node": "Expandir notícias",
             "type": "main",
             "index": 0
           }
@@ -1039,29 +1066,40 @@
         ]
       ]
     },
-    "Montar input · blog": {
+    "Expandir notícias": {
       "main": [
         [
           {
-            "node": "LLM · Dialeto Blog",
+            "node": "Montar input · post",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "LLM · Dialeto Blog": {
+    "Montar input · post": {
       "main": [
         [
           {
-            "node": "Parse blog + montar post",
+            "node": "LLM · Post individual",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Parse blog + montar post": {
+    "LLM · Post individual": {
+      "main": [
+        [
+          {
+            "node": "Parse post + montar payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse post + montar payload": {
       "main": [
         [
           {
@@ -1073,6 +1111,17 @@
       ]
     },
     "Publicar no site": {
+      "main": [
+        [
+          {
+            "node": "Juntar publicados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Juntar publicados": {
       "main": [
         [
           {
@@ -1090,6 +1139,6 @@
   },
   "meta": {
     "generatedBy": "scripts/build-brief-diario.mjs",
-    "generatedAt": "2026-07-01T13:41:22.368Z"
+    "generatedAt": "2026-07-01T19:45:03.888Z"
   }
 }

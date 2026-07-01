@@ -52,7 +52,7 @@ const P_DEBATE = systemPrompt('debate.md')
   .replace('{{persona_cetico}}', systemPrompt('cetico-debate.md'))
 let P_REDATOR = systemPrompt('redator-brief.md')
 const P_DIALETO_WA = systemPrompt('dialeto-whatsapp.md')
-const P_DIALETO_BLOG = systemPrompt('dialeto-blog.md')
+const P_POST_INDIVIDUAL = systemPrompt('dialeto-post-individual.md')
 const P_EDITOR = systemPrompt('editor-cetico.md')
 
 // Injetar o corpus de voz (RAG de voz vira contexto direto). Sem posts → fallback.
@@ -523,52 +523,73 @@ const nIf = add({
 
 const xAfterIf = X
 
-// 3.23a (true) Montar input · dialeto blog
-// Passa o brief WhatsApp aprovado + trechos das fontes pro LLM expandir cada notícia
-// com base nas fontes (não inventar). As notícias com fonte_texto vieram do "Montar input · redator".
-const nInBlog = code(
-  'Montar input · blog',
+// 3.23a (true) Expandir notícias — 1 -> 3 itens (2 debate + 1 utilidade) para virar posts individuais
+const nExpandNoticias = code(
+  'Expandir notícias',
   `const pkg = $('Montar pacote').first().json;
 const noticias = $('Montar input · redator').first().json.noticias || [];
-const fontesTxt = noticias.map((n, i) =>
-  (i + 1) + '. [' + n.link + ']\\n' + String(n.fonte_texto || '(fonte não disponível)').slice(0, 2500)
-).join('\\n\\n');
-const userMessage = 'BRIEF APROVADO (formato WhatsApp):\\n<<<\\n' + pkg.post.content + '\\n>>>\\n\\nFONTES ORIGINAIS (matéria-prima para expandir as notícias do blog — use APENAS o que estiver aqui):\\n\\n' + fontesTxt;
-const system = ${JSON.stringify(P_DIALETO_BLOG)};
-return [{ json: { system, userMessage, _pkg: pkg } }];`,
+const hoje = new Date().toISOString().slice(0, 10);
+return noticias.map((n, i) => ({ json: { ...n, apiUrl: pkg.apiUrl, hoje, ordem: i } }));`,
   { row: -1 }
 )
 
-// 3.23b (true) LLM dialeto blog (max_tokens 5000 — 2 debates x ~400 palavras + utilidade + lede + fontes)
-const nLlmBlog = llm('LLM · Dialeto Blog', 5000, { row: -1 })
+// 3.23b (true) Montar input · post individual (por item, adapta por tipo)
+const nInPost = code(
+  'Montar input · post',
+  `const n = $json;
+let bloco;
+if (n.tipo === 'utilidade') {
+  bloco = 'TIPO: utilidade\\nTÍTULO: ' + n.title +
+    '\\nDICA PRÁTICA: ' + (n.dica_pratica || '');
+} else {
+  bloco = 'TIPO: debate\\nTÍTULO: ' + n.title +
+    '\\nNOTAS: relevância ' + n.relevancia + '/10, confiabilidade ' + n.confiabilidade + '/10' +
+    '\\nSÍNTESE: ' + (n.justificativa || '') +
+    '\\nE EU COM ISSO?: ' + (n.e_eu_com_isso || '') +
+    '\\nTRANSCRIÇÃO DO DEBATE:\\n' + (n.debate || '');
+}
+const userMessage = bloco +
+  '\\n\\nFONTE: ' + n.link +
+  '\\nFATOS DA FONTE (use apenas isto pra expandir):\\n' + String(n.fonte_texto || '(fonte não disponível)').slice(0, 3000);
+const system = ${JSON.stringify(P_POST_INDIVIDUAL)};
+return { json: { system, userMessage, _n: n } };`,
+  { mode: 'runOnceForEachItem', row: -1 }
+)
 
-// 3.23c (true) Parse blog + montar post
-// dialeto-blog.md retorna em tag XML (mesmo motivo do dialeto-whatsapp: evitar JSON.parse com aspas).
-const nParseBlog = code(
-  'Parse blog + montar post',
-  `const raw = String($json.content[0].text);
-let contentMarkdown;
-const m = raw.match(/<post_markdown>([\\s\\S]*?)<\\/post_markdown>/i);
-if (m) {
-  contentMarkdown = m[1].trim();
+// 3.23c (true) LLM post individual (por item)
+const nLlmPost = llm('LLM · Post individual', 4000, { row: -1 })
+
+// 3.23d (true) Parse post + montar payload (por item; titulo/excerpt/post_markdown em XML)
+const nParsePost = code(
+  'Parse post + montar payload',
+  `const meta = $('Montar input · post').item.json._n;
+const raw = String($json.content[0].text);
+const mtit = raw.match(/<titulo>([\\s\\S]*?)<\\/titulo>/i);
+const mexc = raw.match(/<excerpt>([\\s\\S]*?)<\\/excerpt>/i);
+let content;
+const mmd = raw.match(/<post_markdown>([\\s\\S]*?)<\\/post_markdown>/i);
+if (mmd) {
+  content = mmd[1].trim();
 } else {
   const open = raw.match(/<post_markdown>([\\s\\S]*)/i);
-  if (open) {
-    // tag aberta e não fechada (truncado): aproveita o que veio
-    contentMarkdown = open[1].replace(/<\\/post_markdown>\\s*$/i, '').trim();
-  } else {
-    // o modelo ignorou o wrapper e mandou o markdown direto: usa o texto inteiro
-    contentMarkdown = raw.replace(/^\\s*\`\`\`(?:markdown)?\\s*/i, '').replace(/\`\`\`\\s*$/i, '').trim();
-  }
+  content = open ? open[1].replace(/<\\/post_markdown>\\s*$/i, '').trim()
+                 : raw.replace(/^\\s*\`\`\`(?:markdown)?\\s*/i, '').replace(/\`\`\`\\s*$/i, '').trim();
 }
-if (!contentMarkdown) throw new Error('<post_markdown> veio vazio no output do dialeto blog');
-const pkg = $('Montar input · blog').first().json._pkg;
-const post = { ...pkg.post, content: contentMarkdown };
-return [{ json: { post, apiUrl: pkg.apiUrl } }];`,
-  { row: -1 }
+content = content.replace(/^#\\s+.*(?:\\n+|$)/, '').trim();
+if (!content) throw new Error('<post_markdown> veio vazio no post individual');
+const titulo = (mtit ? mtit[1].trim() : '') || meta.title;
+const excerpt = ((mexc ? mexc[1].trim() : '') || content.replace(/[*_#>]/g, ' ').replace(/\\s+/g, ' ').trim()).slice(0, 160);
+const hoje = meta.hoje;
+const base = String(titulo).toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')
+  .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50);
+const slug = base + '-' + hoje + '-' + (meta.ordem + 1);
+const category = meta.tipo === 'utilidade' ? 'Utilidade' : 'Brief';
+const post = { slug, title: titulo, excerpt, date: hoje, readTime: '3 min', category, content };
+return { json: { post, apiUrl: meta.apiUrl } };`,
+  { mode: 'runOnceForEachItem', row: -1 }
 )
 
-// 3.24 (true) Publicar no site
+// 3.24 (true) Publicar no site (por item — 3 posts)
 const nPublicar = add({
   name: 'Publicar no site',
   type: 'n8n-nodes-base.httpRequest',
@@ -584,10 +605,20 @@ const nPublicar = add({
     jsonBody: '={{ JSON.stringify($json.post) }}',
     options: { timeout: 30000 },
   },
+  onError: 'continueRegularOutput',
   credentials: { httpHeaderAuth: { id: 'SITE_TOKEN', name: 'IA Traduzida site (Authorization: Bearer)' } },
 })
 
-// 3.25 (true) Confirma publicado
+// 3.25a (true) Juntar publicados (pra 1 confirmação só)
+const nAggPublicados = add({
+  name: 'Juntar publicados',
+  type: 'n8n-nodes-base.aggregate',
+  typeVersion: 1,
+  position: pos(-1),
+  parameters: { aggregate: 'aggregateAllItemData', destinationFieldName: 'publicados' },
+})
+
+// 3.25b (true) Confirma publicado
 const nConfirma = add({
   name: 'Confirma publicado',
   type: 'n8n-nodes-base.telegram',
@@ -595,7 +626,7 @@ const nConfirma = add({
   position: pos(-1),
   parameters: {
     chatId: CHAT_ID,
-    text: '=Publicado ✅  {{ $json.slug || $json.post?.slug || "" }}',
+    text: '=Publicados ✅ {{ $json.publicados.length }} posts no site.',
     additionalFields: {},
   },
   credentials: { telegramApi: { id: 'TELEGRAM_BOT', name: 'IA Traduzida Bot' } },
@@ -642,11 +673,13 @@ const tail = [nMergeBranches, nAggNoticias, nInRedator, nLlmRedator, nParseBrief
   nLlmDialeto, nParseDialeto, nLlmEditor, nPacote, nApproval, nIf]
 for (let i = 0; i < tail.length - 1; i++) connect(tail[i], tail[i + 1])
 
-connect(nIf, nInBlog, 0) // true
-connect(nInBlog, nLlmBlog)
-connect(nLlmBlog, nParseBlog)
-connect(nParseBlog, nPublicar)
-connect(nPublicar, nConfirma)
+connect(nIf, nExpandNoticias, 0) // true
+connect(nExpandNoticias, nInPost)
+connect(nInPost, nLlmPost)
+connect(nLlmPost, nParsePost)
+connect(nParsePost, nPublicar)
+connect(nPublicar, nAggPublicados)
+connect(nAggPublicados, nConfirma)
 connect(nIf, nDescarta, 1) // false
 
 // ---------------------------------------------------------------------------
