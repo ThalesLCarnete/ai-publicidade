@@ -49,10 +49,19 @@ Depois de UMA linha em branco, vem o corpo, conforme a estrutura do tipo abaixo.
 
 1. LEDE: 1 parágrafo (2-4 frases) que fisga — o fato + por que é curioso/importante pro leitor comum.
 2. CORPO: 2 a 4 parágrafos (3-5 frases cada) expandindo com base nos fatos da fonte — contexto, números, quem está envolvido, o que muda, o que ainda é incerto. Use `##` só se houver camadas distintas que justifiquem.
-3. O DEBATE — seção `## 🎙️ O debate`. Apresente o embate a partir da transcrição fornecida, editado pra ler bem (pode enxugar, não invente falas):
-   **Caio, o entusiasta:** {defesa, 1-3 frases}
-   **Rafael, o cético:** {réplica, 1-3 frases}
-   (pode ter 2ª rodada se render). Mantenha as duas personalidades nítidas.
+3. O DEBATE — seção `## 🎙️ O debate`. É uma CONVERSA de chat, curta e dinâmica, um respondendo o outro. Regras rígidas de formato:
+   - Cada fala é um blockquote PRÓPRIO, começando com o nome em negrito, com UMA LINHA EM BRANCO entre as falas (senão viram um bloco só).
+   - Comece SEMPRE a fala com `**Caio:**` ou `**Rafael:**` (exatamente assim — o site usa isso pra montar os balões do chat).
+   - Alterne Caio → Rafael → Caio → Rafael. TOTAL de 4 falas (no máximo 6 se render muito).
+   - CADA FALA CURTA: 1 a 2 frases, no máximo. Punchy, como mensagem de chat. Enxugue a transcrição — capture o embate, não transcreva tudo. Não invente falas.
+
+   > **Caio:** {abertura empolgada, 1-2 frases}
+
+   > **Rafael:** {réplica cética curta}
+
+   > **Caio:** {tréplica}
+
+   > **Rafael:** {fecho}
 4. SELO — blockquote de uma linha, depois do debate:
    > 📊 **Relevância X/10** · **Confiabilidade Y/10**
 5. E EU COM ISSO — blockquote separado, logo após o selo:

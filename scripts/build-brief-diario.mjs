@@ -592,7 +592,12 @@ for (let i = 0; i < responses.length; i++) {
   content = content.replace(/^\\s*#{0,3}\\s*excerpt\\b.*(?:\\n|$)/i, '').trim();
   if (!content) continue;
   const firstPara = (content.split('\\n').find((l) => { const t = l.trim(); return t && !t.startsWith('#') && !t.startsWith('>'); }) || '').replace(/[*_#>\\[\\]]/g, '').trim();
-  const excerpt = firstPara.slice(0, 160);
+  let excerpt = firstPara;
+  if (excerpt.length > 155) {
+    const cut = excerpt.slice(0, 155);
+    const sp = cut.lastIndexOf(' ');
+    excerpt = (sp > 60 ? cut.slice(0, sp) : cut).replace(/[\\s,;:.\\-]+$/, '') + '…';
+  }
   const hoje = meta.hoje;
   const base = String(title).toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50);
