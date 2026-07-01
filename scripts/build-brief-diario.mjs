@@ -558,35 +558,49 @@ return { json: { system, userMessage, _n: n } };`,
 
 // 3.23c (true) LLM post individual (por item)
 const nLlmPost = llm('LLM · Post individual', 4000, { row: -1 })
+// tolera falha isolada de 1 dos 3 posts sem derrubar o lote (o parse pula respostas vazias)
+nodes.find((n) => n.name === nLlmPost).onError = 'continueRegularOutput'
 
-// 3.23d (true) Parse post + montar payload (por item; titulo/excerpt/post_markdown em XML)
+// 3.23d (true) Parse post + montar payload
+// UM Code node com for sobre .all()[i] (padrão anti-colapso de pareamento): zipa as
+// respostas do LLM com os inputs por índice, sem usar .item (que colapsa pro último).
+// Título = 1ª linha "# ..." (markdown puro; sem tags XML, que o Haiku ignora).
 const nParsePost = code(
   'Parse post + montar payload',
-  `const meta = $('Montar input · post').item.json._n;
-const raw = String($json.content[0].text);
-const mtit = raw.match(/<titulo>([\\s\\S]*?)<\\/titulo>/i);
-const mexc = raw.match(/<excerpt>([\\s\\S]*?)<\\/excerpt>/i);
-let content;
-const mmd = raw.match(/<post_markdown>([\\s\\S]*?)<\\/post_markdown>/i);
-if (mmd) {
-  content = mmd[1].trim();
-} else {
-  const open = raw.match(/<post_markdown>([\\s\\S]*)/i);
-  content = open ? open[1].replace(/<\\/post_markdown>\\s*$/i, '').trim()
-                 : raw.replace(/^\\s*\`\`\`(?:markdown)?\\s*/i, '').replace(/\`\`\`\\s*$/i, '').trim();
+  `const inputs = $('Montar input · post').all();
+const responses = $input.all();
+const out = [];
+for (let i = 0; i < responses.length; i++) {
+  const meta = (inputs[i] && inputs[i].json && inputs[i].json._n) || {};
+  const r = responses[i] && responses[i].json;
+  if (!r || !r.content || !r.content[0] || !r.content[0].text) continue;
+  let raw = String(r.content[0].text).trim();
+  raw = raw.replace(/^\`\`\`(?:markdown)?\\s*/i, '').replace(/\`\`\`\\s*$/i, '').trim();
+  const lines = raw.split('\\n');
+  let title = '';
+  let startIdx = 0;
+  for (let k = 0; k < lines.length; k++) {
+    if (lines[k].trim() === '') continue;
+    const mh = lines[k].match(/^#\\s+(.+)/);
+    if (mh) { title = mh[1].trim(); startIdx = k + 1; }
+    break;
+  }
+  if (!title) title = meta.title || 'Sem título';
+  let content = lines.slice(startIdx).join('\\n');
+  content = content.replace(/^\\s*#{0,3}\\s*excerpt\\b.*(?:\\n|$)/i, '').trim();
+  if (!content) continue;
+  const firstPara = (content.split('\\n').find((l) => { const t = l.trim(); return t && !t.startsWith('#') && !t.startsWith('>'); }) || '').replace(/[*_#>\\[\\]]/g, '').trim();
+  const excerpt = firstPara.slice(0, 160);
+  const hoje = meta.hoje;
+  const base = String(title).toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50);
+  const slug = base + '-' + hoje + '-' + ((meta.ordem || 0) + 1);
+  const category = meta.tipo === 'utilidade' ? 'Utilidade' : 'Brief';
+  out.push({ json: { post: { slug, title, excerpt, date: hoje, readTime: '3 min', category, content }, apiUrl: meta.apiUrl } });
 }
-content = content.replace(/^#\\s+.*(?:\\n+|$)/, '').trim();
-if (!content) throw new Error('<post_markdown> veio vazio no post individual');
-const titulo = (mtit ? mtit[1].trim() : '') || meta.title;
-const excerpt = ((mexc ? mexc[1].trim() : '') || content.replace(/[*_#>]/g, ' ').replace(/\\s+/g, ' ').trim()).slice(0, 160);
-const hoje = meta.hoje;
-const base = String(titulo).toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')
-  .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50);
-const slug = base + '-' + hoje + '-' + (meta.ordem + 1);
-const category = meta.tipo === 'utilidade' ? 'Utilidade' : 'Brief';
-const post = { slug, title: titulo, excerpt, date: hoje, readTime: '3 min', category, content };
-return { json: { post, apiUrl: meta.apiUrl } };`,
-  { mode: 'runOnceForEachItem', row: -1 }
+if (!out.length) throw new Error('nenhum post individual gerado pelo LLM');
+return out;`,
+  { row: -1 }
 )
 
 // 3.24 (true) Publicar no site (por item — 3 posts)
