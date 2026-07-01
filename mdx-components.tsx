@@ -1,4 +1,16 @@
 import type { MDXComponents } from 'mdx/types'
+import type { ReactNode } from 'react'
+
+// Extrai o texto plano de uma árvore de nós React (pra detectar quem fala no debate).
+function nodeText(node: ReactNode): string {
+  if (node == null || typeof node === 'boolean') return ''
+  if (typeof node === 'string' || typeof node === 'number') return String(node)
+  if (Array.isArray(node)) return node.map(nodeText).join('')
+  if (typeof node === 'object' && 'props' in node) {
+    return nodeText((node as { props?: { children?: ReactNode } }).props?.children)
+  }
+  return ''
+}
 
 export function useMDXComponents(): MDXComponents {
   return {
@@ -44,14 +56,35 @@ export function useMDXComponents(): MDXComponents {
     strong: ({ children }) => (
       <strong className="font-bold text-ink dark:text-white">{children}</strong>
     ),
-    blockquote: ({ children }) => (
-      <blockquote className="relative my-8 pl-6 border-l-2 border-y">
-        <span className="absolute -left-1 top-0 w-2 h-2 bg-y rotate-45" />
-        <div className="text-ink/70 dark:text-white/70 italic text-[0.95rem] leading-relaxed">
-          {children}
-        </div>
-      </blockquote>
-    ),
+    blockquote: ({ children }) => {
+      // Falas do debate (começam com "Caio"/"Rafael") viram balões de chat alternados.
+      const speaker = /^\s*\*{0,2}\s*(caio|rafael)\b/i.exec(nodeText(children))?.[1]?.toLowerCase()
+      if (speaker === 'caio' || speaker === 'rafael') {
+        const caio = speaker === 'caio'
+        return (
+          <div className={`my-2.5 flex ${caio ? 'justify-start pr-6 sm:pr-12' : 'justify-end pl-6 sm:pl-12'}`}>
+            <div
+              className={[
+                'max-w-[88%] px-4 py-2.5 border text-[0.9rem] leading-relaxed not-italic [&>p]:mb-0',
+                caio
+                  ? 'bg-y/10 border-y/40 rounded-2xl rounded-bl-sm'
+                  : 'bg-ink/[0.04] dark:bg-white/[0.06] border-ink/15 dark:border-white/15 rounded-2xl rounded-br-sm',
+              ].join(' ')}
+            >
+              {children}
+            </div>
+          </div>
+        )
+      }
+      return (
+        <blockquote className="relative my-8 pl-6 border-l-2 border-y">
+          <span className="absolute -left-1 top-0 w-2 h-2 bg-y rotate-45" />
+          <div className="text-ink/70 dark:text-white/70 italic text-[0.95rem] leading-relaxed">
+            {children}
+          </div>
+        </blockquote>
+      )
+    },
     code: ({ children }) => (
       <code className="font-mono bg-ink/5 dark:bg-white/10 text-[0.85rem] px-1.5 py-0.5 text-y dark:text-y">
         {children}
