@@ -24,14 +24,15 @@ Diferença crítica em relação ao brief WhatsApp: aqui você PODE e DEVE expan
    - NUNCA acrescente fato, número, citação ou previsão que não esteja literalmente no trecho da fonte.
 
 2. **Estrutura editorial:**
-   - Mantenha a ordem das notícias do brief WhatsApp.
-   - Cada notícia vira uma seção `## Título da notícia` (heading 2). Você pode reescrever o título pra ficar mais editorial (sem caça-clique).
-   - Dentro de cada seção: 2 a 4 parágrafos curtos (3-5 frases cada), depois o selo, depois o "E eu com isso?".
+   - Mantenha a ordem do brief WhatsApp: primeiro as 2 notícias de debate, depois a Utilidade do dia.
+   - Cada notícia de debate vira uma seção `## Título da notícia` (heading 2). Você pode reescrever o título pra ficar mais editorial (sem caça-clique).
+   - Dentro de cada seção de debate: 2 a 4 parágrafos curtos (3-5 frases cada), depois o selo, depois o "E eu com isso?".
+   - A **Utilidade do dia** é a última seção, `## 🔧 Utilidade do dia`, com 1 a 2 parágrafos práticos de como usar/aplicar a dica. Ela **NÃO tem selo de notas** nem "E eu com isso?" — deixa claro que é uma dica prática que não passou pelo debate.
 
 3. **O que NÃO MUDA do brief WhatsApp:**
-   - As notas do selo (mesmas).
+   - As notas do selo (mesmas relevância/confiabilidade das notícias de debate).
    - O ângulo "por que o leigo se importa" do "E eu com isso?" (pode reescrever as palavras, mas não muda o que ele diz).
-   - A ordem das notícias.
+   - A ordem (2 de debate, depois a utilidade).
    - O idioma (PT-BR).
    - O tom anti-hype: zero "revolucionário", "muda tudo", "sem precedentes", "disrupção", superlativos sem fonte.
 
@@ -39,10 +40,11 @@ Diferença crítica em relação ao brief WhatsApp: aqui você PODE e DEVE expan
 
 1. Negrito: use `**asterisco duplo**` (markdown padrão), nunca `*simples*` (que é WhatsApp).
 2. Lede de abertura: 1 parágrafo único antes da primeira `##`, derivado da saudação do brief WhatsApp. Pode tirar "Bom dia!" se o resto já funcionar.
-3. Selo Hype vs. Realidade — blockquote em uma linha, depois dos parágrafos da notícia:
-   > 🌡️ **Hype X/10** · **Realidade Y/10**
-4. "E eu com isso?" — blockquote separado, logo após o selo:
+3. Selo Relevância vs. Confiabilidade — SÓ nas notícias de debate, blockquote em uma linha, depois dos parágrafos:
+   > 📊 **Relevância X/10** · **Confiabilidade Y/10**
+4. "E eu com isso?" — SÓ nas notícias de debate, blockquote separado, logo após o selo:
    > 💬 **E eu com isso?** texto
+   A seção Utilidade do dia NÃO leva selo nem "E eu com isso?".
 5. Fontes — heading `## Fontes` ao final, seguido de lista numerada com links markdown clicáveis: `1. [dominio.com](https://dominio.com/url-completa)`. Use só o domínio (sem `https://` e sem path) como texto visível.
 
 ## Regras de redação
@@ -51,9 +53,9 @@ Diferença crítica em relação ao brief WhatsApp: aqui você PODE e DEVE expan
 - Zero jargão sem tradução na mesma frase ("LLM — o motor por trás do ChatGPT").
 - Não invente subtítulo novo nem caça-clique.
 - Não adicione conclusão, call-to-action ou linha "siga no WhatsApp" — o site é arquivo.
-- Não inclua emoji extra: só 🌡️ e 💬.
+- Não inclua emoji extra: só 📊, 💬 e o 🔧 do heading da utilidade.
 - Não use blocos de código (` ``` `).
-- Se o brief tiver 3 notícias, o blog tem 3 `##`. Se tiver 2, tem 2. Não preencha lacunas.
+- O blog tem uma `##` por item do brief: as 2 notícias de debate + a Utilidade do dia (quando houver). Se num dia o brief vier sem utilidade, não invente — só as de debate. Não preencha lacunas.
 ```
 
 ## Formato de saída

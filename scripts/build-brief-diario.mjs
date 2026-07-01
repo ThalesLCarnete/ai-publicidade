@@ -539,17 +539,25 @@ return [{ json: { system, userMessage, _pkg: pkg } }];`,
   { row: -1 }
 )
 
-// 3.23b (true) LLM dialeto blog (max_tokens 4000 — 3 notícias x ~400 palavras + lede + fontes)
-const nLlmBlog = llm('LLM · Dialeto Blog', 4000, { row: -1 })
+// 3.23b (true) LLM dialeto blog (max_tokens 5000 — 2 debates x ~400 palavras + utilidade + lede + fontes)
+const nLlmBlog = llm('LLM · Dialeto Blog', 5000, { row: -1 })
 
 // 3.23c (true) Parse blog + montar post
 // dialeto-blog.md retorna em tag XML (mesmo motivo do dialeto-whatsapp: evitar JSON.parse com aspas).
 const nParseBlog = code(
   'Parse blog + montar post',
   `const raw = String($json.content[0].text);
+let contentMarkdown;
 const m = raw.match(/<post_markdown>([\\s\\S]*?)<\\/post_markdown>/i);
-if (!m) throw new Error('tag <post_markdown> não encontrada no output do dialeto blog');
-const contentMarkdown = m[1].trim();
+if (m) {
+  contentMarkdown = m[1].trim();
+} else {
+  // tag aberta mas não fechada (resposta truncada por max_tokens): aproveita o que veio
+  const open = raw.match(/<post_markdown>([\\s\\S]*)/i);
+  if (!open) throw new Error('tag <post_markdown> não encontrada no output do dialeto blog');
+  contentMarkdown = open[1].replace(/<\\/post_markdown>\\s*$/i, '').trim();
+}
+if (!contentMarkdown) throw new Error('<post_markdown> veio vazio no output do dialeto blog');
 const pkg = $('Montar input · blog').first().json._pkg;
 const post = { ...pkg.post, content: contentMarkdown };
 return [{ json: { post, apiUrl: pkg.apiUrl } }];`,
