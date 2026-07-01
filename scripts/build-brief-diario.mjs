@@ -44,7 +44,12 @@ function systemPrompt(file) {
 }
 
 const P_CLASSIFICADOR = systemPrompt('classificador.md')
-const P_HYPE = systemPrompt('tradutor-de-hype.md')
+const P_CURADOR = systemPrompt('curador-utilidade.md')
+// Debate em UMA chamada: o orquestrador (debate.md) recebe as duas personas injetadas.
+// Fonte única de cada persona nos arquivos visionario.md / cetico-debate.md.
+const P_DEBATE = systemPrompt('debate.md')
+  .replace('{{persona_visionario}}', systemPrompt('visionario.md'))
+  .replace('{{persona_cetico}}', systemPrompt('cetico-debate.md'))
 let P_REDATOR = systemPrompt('redator-brief.md')
 const P_DIALETO_WA = systemPrompt('dialeto-whatsapp.md')
 const P_DIALETO_BLOG = systemPrompt('dialeto-blog.md')
@@ -80,10 +85,10 @@ function add(node) {
   nodes.push(node)
   return node.name
 }
-function connect(from, to, outIndex = 0) {
+function connect(from, to, outIndex = 0, inIndex = 0) {
   connections[from] = connections[from] || { main: [] }
   while (connections[from].main.length <= outIndex) connections[from].main.push([])
-  connections[from].main[outIndex].push({ node: to, type: 'main', index: 0 })
+  connections[from].main[outIndex].push({ node: to, type: 'main', index: inIndex })
 }
 
 function code(name, jsCode, { row = 0, mode = 'runOnceForAllItems' } = {}) {
@@ -250,9 +255,9 @@ const nFetch = add({
   onError: 'continueRegularOutput',
 })
 
-// 3.10 Extrair texto + montar input do hype (por item)
-const nExtract = code(
-  'Extrair texto + input hype',
+// 3.10 Extrair texto + montar input do DEBATE (por item)
+const nExtractDebate = code(
+  'Extrair texto + input debate',
   `const meta = $('Expandir seleção').item.json;
 let html = $json.data;
 if (html == null) html = $json.body;
@@ -265,28 +270,109 @@ const text = html
   .replace(/\\s+/g, ' ')
   .trim()
   .slice(0, 6000);
-const userMessage = 'NOTÍCIA:\\nTÍTULO: ' + meta.title + '\\nRESUMO: ' + meta.resumo +
+const userMessage = 'NOTÍCIA EM DEBATE:\\nTÍTULO: ' + meta.title + '\\nRESUMO: ' + meta.resumo +
   '\\nFONTE (' + meta.link + '):\\n' + (text || '(não foi possível extrair o texto da fonte)');
-const system = ${JSON.stringify(P_HYPE)};
+const system = ${JSON.stringify(P_DEBATE)};
 return { json: { title: meta.title, link: meta.link, source: meta.source, resumo: meta.resumo, fonte_texto: text, system, userMessage } };`,
   { mode: 'runOnceForEachItem' }
 )
 
-// 3.11 LLM hype (por item)
-const nLlmHype = llm('LLM · Tradutor de Hype', 1024)
+// 3.11 LLM debate — Caio (Visionário) x Rafael (Cético) numa única chamada (por item)
+const nLlmDebate = llm('LLM · Debate', 2500)
 
-// 3.12 Merge notas (por item)
-const nMerge = code(
-  'Merge notas',
-  `${PJ}
-const meta = $('Extrair texto + input hype').item.json;
-const n = pj($json.content[0].text);
+// 3.12 Parse debate (XML, fail-fast) (por item)
+const nParseDebate = code(
+  'Parse debate',
+  `const meta = $('Extrair texto + input debate').item.json;
+const raw = String($json.content[0].text);
+const relevancia = parseInt((raw.match(/<relevancia>\\s*(\\d+)\\s*<\\/relevancia>/i) || [])[1] || '', 10);
+const confiabilidade = parseInt((raw.match(/<confiabilidade>\\s*(\\d+)\\s*<\\/confiabilidade>/i) || [])[1] || '', 10);
+const justificativa = ((raw.match(/<justificativa>([\\s\\S]*?)<\\/justificativa>/i) || [])[1] || '').trim();
+const e_eu_com_isso = ((raw.match(/<e_eu_com_isso>([\\s\\S]*?)<\\/e_eu_com_isso>/i) || [])[1] || '').trim();
+const debate = ((raw.match(/<debate>([\\s\\S]*?)<\\/debate>/i) || [])[1] || '').trim();
+if (Number.isNaN(relevancia) || Number.isNaN(confiabilidade)) throw new Error('tags <relevancia>/<confiabilidade> não encontradas no output do debate');
 return { json: {
+  tipo: 'debate',
   title: meta.title, link: meta.link, source: meta.source, resumo: meta.resumo, fonte_texto: meta.fonte_texto,
-  nota_hype: n.nota_hype, nota_realidade: n.nota_realidade, justificativa: n.justificativa, e_eu_com_isso: n.e_eu_com_isso,
+  relevancia, confiabilidade, justificativa, e_eu_com_isso, debate,
 }};`,
   { mode: 'runOnceForEachItem' }
 )
+
+// --- Ramo paralelo: UTILIDADE DO DIA (fora do debate, sem notas) ---
+
+// 3.12a Montar input do curador (mesma lista de manchetes)
+const nInCurador = code(
+  'Montar input · curador',
+  `const manchetes = $input.first().json.manchetes || [];
+const linhas = manchetes.map((m, i) => '[' + i + '] ' + m.title + ' — ' + (m.source || '') + '\\n    ' + (m.resumo || '')).join('\\n\\n');
+const userMessage = 'MANCHETES DE HOJE (' + manchetes.length + ' candidatas):\\n\\n' + linhas;
+const system = ${JSON.stringify(P_CURADOR)};
+return [{ json: { system, userMessage, manchetes } }];`,
+  { row: 2 }
+)
+
+// 3.12b LLM curador de utilidade
+const nLlmCurador = llm('LLM · Curador utilidade', 512, { row: 2 })
+
+// 3.12c Expandir utilidade (1 -> 0 ou 1 item; indice -1 = sem utilidade hoje)
+const nExpandUtil = code(
+  'Expandir utilidade',
+  `${PJ}
+let resp; try { resp = pj($json.content[0].text); } catch (e) { return []; }
+const manchetes = $('Montar input · curador').first().json.manchetes || [];
+const idx = (resp && Number.isInteger(resp.indice)) ? resp.indice : -1;
+if (idx < 0 || !manchetes[idx]) return [];
+const m = manchetes[idx];
+return [{ json: { title: m.title, link: m.link, source: m.source, resumo: m.resumo, dica_pratica: resp.dica_pratica || '' } }];`,
+  { row: 2 }
+)
+
+// 3.12d Buscar fonte da utilidade (por item)
+const nFetchUtil = add({
+  name: 'Buscar fonte (utilidade)',
+  type: 'n8n-nodes-base.httpRequest',
+  typeVersion: 4.2,
+  position: pos(2),
+  parameters: {
+    method: 'GET',
+    url: '={{ $json.link }}',
+    options: { timeout: 15000, response: { response: { responseFormat: 'text' } } },
+  },
+  onError: 'continueRegularOutput',
+})
+
+// 3.12e Extrair texto da utilidade (por item, sem LLM, sem notas)
+const nExtractUtil = code(
+  'Extrair texto (utilidade)',
+  `const meta = $('Expandir utilidade').item.json;
+let html = $json.data;
+if (html == null) html = $json.body;
+if (typeof html !== 'string') html = html ? JSON.stringify(html) : '';
+const text = html
+  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ')
+  .replace(/<style[\\s\\S]*?<\\/style>/gi, ' ')
+  .replace(/<[^>]+>/g, ' ')
+  .replace(/&[a-z#0-9]+;/gi, ' ')
+  .replace(/\\s+/g, ' ')
+  .trim()
+  .slice(0, 4000);
+return { json: {
+  tipo: 'utilidade',
+  title: meta.title, link: meta.link, source: meta.source, resumo: meta.resumo,
+  fonte_texto: text, dica_pratica: meta.dica_pratica || '',
+}};`,
+  { mode: 'runOnceForEachItem', row: 2 }
+)
+
+// 3.12f Merge: junta as 2 de debate (input 0) + a utilidade (input 1)
+const nMergeBranches = add({
+  name: 'Juntar debate + utilidade',
+  type: 'n8n-nodes-base.merge',
+  typeVersion: 2.1,
+  position: pos(1),
+  parameters: { mode: 'append' },
+})
 
 // 3.13 Juntar notícias enriquecidas
 const nAggNoticias = add({
@@ -302,15 +388,24 @@ const nInRedator = code(
   'Montar input · redator',
   `const noticias = $input.first().json.noticias || [];
 const data = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
-const blocos = noticias.map((n, i) =>
+const debates = noticias.filter((n) => n.tipo !== 'utilidade');
+const utils = noticias.filter((n) => n.tipo === 'utilidade');
+const blocosDebate = debates.map((n, i) =>
   (i + 1) + '. TÍTULO: ' + n.title +
   '\\n   FATOS (da fonte): ' + String(n.fonte_texto || '').slice(0, 1500) +
-  '\\n   NOTAS: hype ' + n.nota_hype + '/10, realidade ' + n.nota_realidade + '/10' +
+  '\\n   NOTAS: relevância ' + n.relevancia + '/10, confiabilidade ' + n.confiabilidade + '/10' +
   '\\n   JUSTIFICATIVA: ' + n.justificativa +
   '\\n   E EU COM ISSO?: ' + n.e_eu_com_isso +
   '\\n   FONTE: ' + n.link
 ).join('\\n\\n');
-const userMessage = 'DATA: ' + data + '\\n\\nNOTÍCIAS DO DIA (' + noticias.length + ' selecionadas):\\n\\n' + blocos;
+const blocosUtil = utils.map((n) =>
+  '- TÍTULO: ' + n.title +
+  '\\n  FATOS (da fonte): ' + String(n.fonte_texto || '').slice(0, 1200) +
+  '\\n  DICA PRÁTICA: ' + (n.dica_pratica || '') +
+  '\\n  FONTE: ' + n.link
+).join('\\n\\n');
+let userMessage = 'DATA: ' + data + '\\n\\nNOTÍCIAS DE DEBATE (' + debates.length + '):\\n\\n' + blocosDebate;
+if (utils.length) userMessage += '\\n\\nUTILIDADE DO DIA (' + utils.length + ', sem notas):\\n\\n' + blocosUtil;
 const system = ${JSON.stringify(P_REDATOR)};
 return [{ json: { system, userMessage, noticias } }];`
 )
@@ -374,9 +469,9 @@ const hoje = new Date().toISOString().slice(0, 10);
 const slug = String(prev.titulo_do_dia).toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')
   .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) + '-' + hoje;
 const flag = ed.veredito === 'libera' ? '✅ liberado' : '⚠️ revisar';
-const problemas = (ed.problemas || []).map((p) => '• ' + p).join('\\n');
+const problemasTxt = (ed.problemas || []).map((p) => '• ' + p).join('\\n');
 const telegramText = flag + ' — Editor-Cético: ' + ed.score + '/100\\n\\n' + prev.texto_final +
-  '\\n\\n— — —\\n' + (problemas ? 'Apontamentos:\\n' + problemas : 'Sem apontamentos.') +
+  '\\n\\n— — —\\n' + (problemasTxt ? 'Apontamentos:\\n' + problemasTxt : 'Sem apontamentos.') +
   '\\n\\nAprovar = publica no site. Recusar = descarta.';
 // Telegram limita mensagens a 4096 chars; trunca a prévia (o texto completo vai pro site).
 const TG_MAX = 3900;
@@ -512,12 +607,29 @@ const nDescarta = add({
 // ---------------------------------------------------------------------------
 // 4. Conexões (cadeia linear + ramo do IF)
 // ---------------------------------------------------------------------------
-const chain = [
-  nTrigger, nFeeds, nRss, nDedup, nAggManchetes, nInClass, nLlmClass, nExpand,
-  nFetch, nExtract, nLlmHype, nMerge, nAggNoticias, nInRedator, nLlmRedator,
-  nParseBrief, nLlmDialeto, nParseDialeto, nLlmEditor, nPacote, nApproval, nIf,
-]
-for (let i = 0; i < chain.length - 1; i++) connect(chain[i], chain[i + 1])
+// Parte linear até as manchetes
+const head = [nTrigger, nFeeds, nRss, nDedup, nAggManchetes]
+for (let i = 0; i < head.length - 1; i++) connect(head[i], head[i + 1])
+
+// Ramo do debate (2 notícias mais incríveis)
+connect(nAggManchetes, nInClass)
+const debateChain = [nInClass, nLlmClass, nExpand, nFetch, nExtractDebate, nLlmDebate, nParseDebate]
+for (let i = 0; i < debateChain.length - 1; i++) connect(debateChain[i], debateChain[i + 1])
+
+// Ramo paralelo da utilidade (1 notícia prática, fora do debate)
+connect(nAggManchetes, nInCurador)
+const utilChain = [nInCurador, nLlmCurador, nExpandUtil, nFetchUtil, nExtractUtil]
+for (let i = 0; i < utilChain.length - 1; i++) connect(utilChain[i], utilChain[i + 1])
+
+// Junta os dois ramos: debate -> input 0, utilidade -> input 1 (define a ordem no brief)
+connect(nParseDebate, nMergeBranches, 0, 0)
+connect(nExtractUtil, nMergeBranches, 0, 1)
+
+// Parte linear final
+const tail = [nMergeBranches, nAggNoticias, nInRedator, nLlmRedator, nParseBrief,
+  nLlmDialeto, nParseDialeto, nLlmEditor, nPacote, nApproval, nIf]
+for (let i = 0; i < tail.length - 1; i++) connect(tail[i], tail[i + 1])
+
 connect(nIf, nInBlog, 0) // true
 connect(nInBlog, nLlmBlog)
 connect(nLlmBlog, nParseBlog)
