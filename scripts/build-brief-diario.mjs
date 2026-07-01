@@ -569,9 +569,11 @@ const nParsePost = code(
   'Parse post + montar payload',
   `const inputs = $('Montar input · post').all();
 const responses = $input.all();
-const out = [];
+const posts = [];
+let apiUrl = '';
 for (let i = 0; i < responses.length; i++) {
   const meta = (inputs[i] && inputs[i].json && inputs[i].json._n) || {};
+  if (meta.apiUrl) apiUrl = meta.apiUrl;
   const r = responses[i] && responses[i].json;
   if (!r || !r.content || !r.content[0] || !r.content[0].text) continue;
   let raw = String(r.content[0].text).trim();
@@ -596,14 +598,15 @@ for (let i = 0; i < responses.length; i++) {
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50);
   const slug = base + '-' + hoje + '-' + ((meta.ordem || 0) + 1);
   const category = meta.tipo === 'utilidade' ? 'Utilidade' : 'Brief';
-  out.push({ json: { post: { slug, title, excerpt, date: hoje, readTime: '3 min', category, content }, apiUrl: meta.apiUrl } });
+  posts.push({ slug, title, excerpt, date: hoje, readTime: '3 min', category, content });
 }
-if (!out.length) throw new Error('nenhum post individual gerado pelo LLM');
-return out;`,
+if (!posts.length) throw new Error('nenhum post individual gerado pelo LLM');
+// UM item com os N posts — publicação em lote (1 escrita no Blob, sem corrida)
+return [{ json: { posts, apiUrl } }];`,
   { row: -1 }
 )
 
-// 3.24 (true) Publicar no site (por item — 3 posts)
+// 3.24 (true) Publicar no site — LOTE: 1 request com os 3 posts (1 escrita no Blob)
 const nPublicar = add({
   name: 'Publicar no site',
   type: 'n8n-nodes-base.httpRequest',
@@ -616,23 +619,13 @@ const nPublicar = add({
     genericAuthType: 'httpHeaderAuth',
     sendBody: true,
     specifyBody: 'json',
-    jsonBody: '={{ JSON.stringify($json.post) }}',
+    jsonBody: '={{ JSON.stringify({ posts: $json.posts }) }}',
     options: { timeout: 30000 },
   },
-  onError: 'continueRegularOutput',
   credentials: { httpHeaderAuth: { id: 'SITE_TOKEN', name: 'IA Traduzida site (Authorization: Bearer)' } },
 })
 
-// 3.25a (true) Juntar publicados (pra 1 confirmação só)
-const nAggPublicados = add({
-  name: 'Juntar publicados',
-  type: 'n8n-nodes-base.aggregate',
-  typeVersion: 1,
-  position: pos(-1),
-  parameters: { aggregate: 'aggregateAllItemData', destinationFieldName: 'publicados' },
-})
-
-// 3.25b (true) Confirma publicado
+// 3.25 (true) Confirma publicado (a API responde { created, slugs })
 const nConfirma = add({
   name: 'Confirma publicado',
   type: 'n8n-nodes-base.telegram',
@@ -640,7 +633,7 @@ const nConfirma = add({
   position: pos(-1),
   parameters: {
     chatId: CHAT_ID,
-    text: '=Publicados ✅ {{ $json.publicados.length }} posts no site.',
+    text: '=Publicados ✅ {{ $json.created }} posts no site: {{ ($json.slugs || []).join(", ") }}',
     additionalFields: {},
   },
   credentials: { telegramApi: { id: 'TELEGRAM_BOT', name: 'IA Traduzida Bot' } },
@@ -692,8 +685,7 @@ connect(nExpandNoticias, nInPost)
 connect(nInPost, nLlmPost)
 connect(nLlmPost, nParsePost)
 connect(nParsePost, nPublicar)
-connect(nPublicar, nAggPublicados)
-connect(nAggPublicados, nConfirma)
+connect(nPublicar, nConfirma)
 connect(nIf, nDescarta, 1) // false
 
 // ---------------------------------------------------------------------------

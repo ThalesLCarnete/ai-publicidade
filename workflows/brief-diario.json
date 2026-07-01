@@ -633,7 +633,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const inputs = $('Montar input · post').all();\nconst responses = $input.all();\nconst out = [];\nfor (let i = 0; i < responses.length; i++) {\n  const meta = (inputs[i] && inputs[i].json && inputs[i].json._n) || {};\n  const r = responses[i] && responses[i].json;\n  if (!r || !r.content || !r.content[0] || !r.content[0].text) continue;\n  let raw = String(r.content[0].text).trim();\n  raw = raw.replace(/^```(?:markdown)?\\s*/i, '').replace(/```\\s*$/i, '').trim();\n  const lines = raw.split('\\n');\n  let title = '';\n  let startIdx = 0;\n  for (let k = 0; k < lines.length; k++) {\n    if (lines[k].trim() === '') continue;\n    const mh = lines[k].match(/^#\\s+(.+)/);\n    if (mh) { title = mh[1].trim(); startIdx = k + 1; }\n    break;\n  }\n  if (!title) title = meta.title || 'Sem título';\n  let content = lines.slice(startIdx).join('\\n');\n  content = content.replace(/^\\s*#{0,3}\\s*excerpt\\b.*(?:\\n|$)/i, '').trim();\n  if (!content) continue;\n  const firstPara = (content.split('\\n').find((l) => { const t = l.trim(); return t && !t.startsWith('#') && !t.startsWith('>'); }) || '').replace(/[*_#>\\[\\]]/g, '').trim();\n  const excerpt = firstPara.slice(0, 160);\n  const hoje = meta.hoje;\n  const base = String(title).toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')\n    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50);\n  const slug = base + '-' + hoje + '-' + ((meta.ordem || 0) + 1);\n  const category = meta.tipo === 'utilidade' ? 'Utilidade' : 'Brief';\n  out.push({ json: { post: { slug, title, excerpt, date: hoje, readTime: '3 min', category, content }, apiUrl: meta.apiUrl } });\n}\nif (!out.length) throw new Error('nenhum post individual gerado pelo LLM');\nreturn out;"
+        "jsCode": "const inputs = $('Montar input · post').all();\nconst responses = $input.all();\nconst posts = [];\nlet apiUrl = '';\nfor (let i = 0; i < responses.length; i++) {\n  const meta = (inputs[i] && inputs[i].json && inputs[i].json._n) || {};\n  if (meta.apiUrl) apiUrl = meta.apiUrl;\n  const r = responses[i] && responses[i].json;\n  if (!r || !r.content || !r.content[0] || !r.content[0].text) continue;\n  let raw = String(r.content[0].text).trim();\n  raw = raw.replace(/^```(?:markdown)?\\s*/i, '').replace(/```\\s*$/i, '').trim();\n  const lines = raw.split('\\n');\n  let title = '';\n  let startIdx = 0;\n  for (let k = 0; k < lines.length; k++) {\n    if (lines[k].trim() === '') continue;\n    const mh = lines[k].match(/^#\\s+(.+)/);\n    if (mh) { title = mh[1].trim(); startIdx = k + 1; }\n    break;\n  }\n  if (!title) title = meta.title || 'Sem título';\n  let content = lines.slice(startIdx).join('\\n');\n  content = content.replace(/^\\s*#{0,3}\\s*excerpt\\b.*(?:\\n|$)/i, '').trim();\n  if (!content) continue;\n  const firstPara = (content.split('\\n').find((l) => { const t = l.trim(); return t && !t.startsWith('#') && !t.startsWith('>'); }) || '').replace(/[*_#>\\[\\]]/g, '').trim();\n  const excerpt = firstPara.slice(0, 160);\n  const hoje = meta.hoje;\n  const base = String(title).toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')\n    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50);\n  const slug = base + '-' + hoje + '-' + ((meta.ordem || 0) + 1);\n  const category = meta.tipo === 'utilidade' ? 'Utilidade' : 'Brief';\n  posts.push({ slug, title, excerpt, date: hoje, readTime: '3 min', category, content });\n}\nif (!posts.length) throw new Error('nenhum post individual gerado pelo LLM');\n// UM item com os N posts — publicação em lote (1 escrita no Blob, sem corrida)\nreturn [{ json: { posts, apiUrl } }];"
       }
     },
     {
@@ -651,12 +651,11 @@
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify($json.post) }}",
+        "jsonBody": "={{ JSON.stringify({ posts: $json.posts }) }}",
         "options": {
           "timeout": 30000
         }
       },
-      "onError": "continueRegularOutput",
       "credentials": {
         "httpHeaderAuth": {
           "id": "SITE_TOKEN",
@@ -665,29 +664,16 @@
       }
     },
     {
-      "name": "Juntar publicados",
-      "type": "n8n-nodes-base.aggregate",
-      "typeVersion": 1,
+      "name": "Confirma publicado",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
       "position": [
         7920,
         120
       ],
       "parameters": {
-        "aggregate": "aggregateAllItemData",
-        "destinationFieldName": "publicados"
-      }
-    },
-    {
-      "name": "Confirma publicado",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        8160,
-        120
-      ],
-      "parameters": {
         "chatId": "REPLACE_CHAT_ID",
-        "text": "=Publicados ✅ {{ $json.publicados.length }} posts no site.",
+        "text": "=Publicados ✅ {{ $json.created }} posts no site: {{ ($json.slugs || []).join(\", \") }}",
         "additionalFields": {}
       },
       "credentials": {
@@ -1115,17 +1101,6 @@
       "main": [
         [
           {
-            "node": "Juntar publicados",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Juntar publicados": {
-      "main": [
-        [
-          {
             "node": "Confirma publicado",
             "type": "main",
             "index": 0
@@ -1140,6 +1115,6 @@
   },
   "meta": {
     "generatedBy": "scripts/build-brief-diario.mjs",
-    "generatedAt": "2026-07-01T20:25:45.029Z"
+    "generatedAt": "2026-07-01T20:46:32.324Z"
   }
 }
