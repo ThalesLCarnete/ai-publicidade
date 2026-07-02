@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+<meta name="theme-color" content="#07171c">
+<meta name="author" content="Thales Carnete">
+<meta name="description" content="IA HUB: ranking das melhores inteligências artificiais para marketing, copywriting e criação de conteúdo em 2026. Recorte de 02 de julho de 2026, por Thales Carnete.">
+<meta property="og:title" content="IA HUB — Melhores IAs para Marketing e Conteúdo 2026">
+<meta property="og:description" content="Ranking das IAs mais indicadas para copywriting, conteúdo, criativos, vídeo e voz. Por Thales Carnete.">
+<meta property="og:type" content="website">
+<title>IA HUB — Operational Systems · Melhores IAs para Marketing 2026 | Thales Carnete</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#07171c;
+    --bg2:#0a2028;
+    --panel:#0c242c;
+    --panel2:#0f2d37;
+    --border:#1c4f57;
+    --border2:#2a6d73;
+    --grid:rgba(47,212,207,.05);
+    --txt:#d7f5f2;
+    --muted:#87b8b6;
+    --muted2:#5d8f8d;
+    --cyan:#2fd4cf;
+    --cyan-bright:#5cf2ec;
+    --gold:#f4b81e;
+    --gold-bright:#ffc93c;
+    --green:#5ce68a;
+    --pink:#f27ba6;
+    --danger:#ff5d5d;
+    --pixel:"Press Start 2P", monospace;
+    --mono:"Share Tech Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0/40px 40px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/40px 40px,
+      radial-gradient(1000px 600px at 82% -8%, rgba(47,212,207,.10), transparent 60%),
+      radial-gradient(900px 600px at 5% 10%, rgba(244,184,30,.06), transparent 55%),
+      var(--bg);
+    color:var(--txt);
+    font-family:var(--mono);
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+  }
+  /* scanlines overlay */
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+    background:repeating-linear-gradient(180deg, rgba(0,0,0,.10) 0 2px, transparent 2px 4px);
+    mix-blend-mode:multiply;opacity:.5}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px;position:relative;z-index:2}
+  .muted{color:var(--muted)} .small{font-size:13px}
+
+  .px{font-family:var(--pixel);line-height:1.5;letter-spacing:0}
+
+  /* HUD panel — sharp corners + hard shadow + bracket corners */
+  .hud{position:relative;background:var(--panel);border:2px solid var(--border2);
+    box-shadow:6px 6px 0 rgba(0,0,0,.35), 0 0 0 1px rgba(47,212,207,.08) inset}
+  .hud::before,.hud::after{content:"";position:absolute;width:12px;height:12px;pointer-events:none}
+  .hud::before{top:-2px;left:-2px;border-top:2px solid var(--cyan);border-left:2px solid var(--cyan)}
+  .hud::after{bottom:-2px;right:-2px;border-bottom:2px solid var(--cyan);border-right:2px solid var(--cyan)}
+
+  /* Header */
+  header.top{position:sticky;top:0;z-index:50;backdrop-filter:blur(8px);
+    background:rgba(7,23,28,.9);border-bottom:2px solid var(--border)}
+  .top-inner{display:flex;align-items:center;gap:14px;height:66px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand .logo{width:40px;height:40px;background:var(--gold);color:#1a1200;
+    display:grid;place-items:center;font-family:var(--pixel);font-size:11px;
+    box-shadow:4px 4px 0 rgba(0,0,0,.4);border:2px solid var(--gold-bright)}
+  .brand .bt{font-family:var(--pixel);font-size:15px;color:var(--gold-bright);text-shadow:2px 2px 0 rgba(0,0,0,.5)}
+  .brand .bs{font-size:12px;color:var(--muted2);letter-spacing:1px;text-transform:uppercase}
+  .tbwa{margin-left:6px;font-family:var(--pixel);font-size:9px;color:var(--txt);
+    background:#3a4750;border:1px solid #556570;padding:6px 8px;box-shadow:3px 3px 0 rgba(0,0,0,.4)}
+  .top-nav{display:flex;gap:4px;margin-left:auto}
+  .top-nav a{font-size:14px;color:var(--muted);padding:8px 12px;border:1px solid transparent}
+  .top-nav a:hover{color:var(--cyan-bright);border-color:var(--border)}
+  .top-nav a.cta{background:var(--gold);color:#1a1200;font-family:var(--pixel);font-size:10px;
+    border:2px solid var(--gold-bright);box-shadow:3px 3px 0 rgba(0,0,0,.4);padding:9px 12px}
+
+  /* Hero */
+  .hero{padding:58px 0 22px;text-align:center}
+  .badge{display:inline-flex;align-items:center;gap:9px;font-family:var(--pixel);font-size:9px;
+    color:var(--cyan-bright);background:rgba(47,212,207,.08);border:1px solid var(--border2);
+    padding:9px 14px;margin-bottom:24px;box-shadow:3px 3px 0 rgba(0,0,0,.35)}
+  .badge .dot{width:8px;height:8px;background:var(--gold);box-shadow:0 0 8px var(--gold)}
+  h1{font-family:var(--pixel);font-size:clamp(19px,3.6vw,34px);line-height:1.5;color:var(--gold-bright);
+    text-shadow:4px 4px 0 rgba(0,0,0,.55), 0 0 18px rgba(244,184,30,.25);letter-spacing:0}
+  h1 .grad{display:block;margin-top:16px;color:var(--cyan-bright);
+    text-shadow:4px 4px 0 rgba(0,0,0,.55), 0 0 18px rgba(47,212,207,.3)}
+  .hero p.lead{max-width:720px;margin:26px auto 0;color:var(--muted);font-size:16.5px}
+  .byline{margin-top:24px;font-size:14px;color:var(--muted2);display:flex;gap:14px;justify-content:center;flex-wrap:wrap;align-items:center}
+  .byline .author{display:inline-flex;align-items:center;gap:9px;color:var(--txt)}
+  .byline .author .ph{width:28px;height:28px;background:var(--cyan);color:#04141a;display:grid;place-items:center;
+    font-family:var(--pixel);font-size:8px;border:2px solid var(--cyan-bright)}
+  .recorte{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--gold-bright);
+    background:rgba(244,184,30,.08);border:1px solid rgba(244,184,30,.35);padding:6px 12px}
+
+  .chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:30px}
+  .chip{font-size:13.5px;padding:9px 14px;border:2px solid var(--border);background:var(--panel);
+    color:var(--muted);transition:.12s;cursor:pointer;box-shadow:3px 3px 0 rgba(0,0,0,.3)}
+  .chip:hover{border-color:var(--cyan);color:var(--cyan-bright);transform:translate(-1px,-1px);box-shadow:4px 4px 0 rgba(0,0,0,.35)}
+  .chip.active{background:var(--gold);color:#1a1200;border-color:var(--gold-bright);font-weight:bold}
+
+  section{padding:42px 0;scroll-margin-top:84px}
+  .sec-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+  .sec-head.mb{margin-bottom:24px}
+  h2{font-family:var(--pixel);font-size:clamp(15px,2.4vw,20px);color:var(--gold-bright);
+    line-height:1.5;text-shadow:3px 3px 0 rgba(0,0,0,.5)}
+  .sec-sub{color:var(--muted2);font-size:13.5px;text-transform:uppercase;letter-spacing:1px}
+  .sec-desc{color:var(--muted);font-size:15px;max-width:770px;margin-bottom:24px}
+  .sec-desc b{color:var(--txt)}
+
+  /* Featured marketing */
+  .featured{background:linear-gradient(180deg,rgba(47,212,207,.07),rgba(12,36,44,.5));padding:30px}
+  .featured .kicker{font-family:var(--pixel);font-size:9px;color:var(--pink);letter-spacing:1px}
+  .featured h2{margin:12px 0 4px}
+  .podium{display:grid;grid-template-columns:1fr 1.12fr 1fr;gap:16px;align-items:end;margin-top:28px}
+  .pod{background:var(--panel2);border:2px solid var(--border2);padding:22px 16px;text-align:center;
+    position:relative;box-shadow:5px 5px 0 rgba(0,0,0,.35)}
+  .pod .bartop{position:absolute;top:0;left:0;right:0;height:5px}
+  .pod.p1 .bartop{background:var(--gold)}
+  .pod.p2 .bartop{background:var(--muted)}
+  .pod.p3 .bartop{background:var(--pink)}
+  .pod.p1{transform:translateY(-14px);border-color:var(--gold)}
+  .pod .rank-emoji{font-size:26px;margin-bottom:4px}
+  .pod .score{font-family:var(--pixel);font-size:30px;color:var(--cyan-bright);margin:6px 0 4px;text-shadow:3px 3px 0 rgba(0,0,0,.5)}
+  .pod .slab{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted2)}
+  .pod .name{font-family:var(--pixel);font-size:12px;color:var(--txt);margin-top:12px;line-height:1.5}
+  .pod .maker{color:var(--muted2);font-size:13px;margin-top:6px;text-transform:uppercase;letter-spacing:.5px}
+  .pod .why{color:var(--muted);font-size:13px;margin-top:12px;line-height:1.55;border-top:1px solid var(--border);padding-top:12px}
+
+  .rank-list{display:flex;flex-direction:column;gap:9px;margin-top:18px}
+  .rank-item{display:flex;align-items:center;gap:14px;background:var(--panel);border:2px solid var(--border);
+    padding:13px 16px;transition:.12s;box-shadow:3px 3px 0 rgba(0,0,0,.3)}
+  .rank-item:hover{border-color:var(--cyan);transform:translateX(3px)}
+  .rank-item .pos{width:30px;font-family:var(--pixel);font-size:13px;text-align:center;color:var(--gold);flex:none}
+  .rank-item .avatar{width:34px;height:34px;background:var(--panel2);display:grid;place-items:center;
+    font-family:var(--pixel);font-size:11px;color:var(--cyan-bright);flex:none;border:2px solid var(--border2)}
+  .rank-item .info{flex:1;min-width:0}
+  .rank-item .info .m{color:var(--txt);font-size:15px}
+  .rank-item .info .c{color:var(--muted2);font-size:13px;margin-top:2px}
+  .rank-item .info .c b{color:var(--cyan-bright)}
+  .rank-item .aa-score{font-family:var(--pixel);font-size:16px;color:var(--cyan-bright);flex:none;text-align:right}
+  .rank-item .aa-score span{display:block;font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--muted2);text-transform:uppercase;margin-top:4px}
+
+  /* stats */
+  .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+  .stat{background:var(--panel);border:2px solid var(--border);padding:18px 10px;text-align:center;box-shadow:3px 3px 0 rgba(0,0,0,.3)}
+  .stat .num{font-family:var(--pixel);font-size:17px;color:var(--gold-bright);text-shadow:2px 2px 0 rgba(0,0,0,.5)}
+  .stat .lab{color:var(--muted2);font-size:11px;margin-top:8px;text-transform:uppercase;letter-spacing:1px}
+
+  /* category cards */
+  .cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .card{background:var(--panel);border:2px solid var(--border2);padding:22px;transition:.12s;
+    box-shadow:5px 5px 0 rgba(0,0,0,.32)}
+  .card:hover{border-color:var(--cyan);transform:translate(-1px,-1px)}
+  .card .chead{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .card .chead .ico{font-size:20px}
+  .card h3{font-family:var(--pixel);font-size:11px;color:var(--gold-bright);line-height:1.5}
+  .card .use{font-size:13px;color:var(--pink);margin:6px 0 16px;text-transform:uppercase;letter-spacing:.5px}
+  .crow{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--border)}
+  .crow:first-of-type{border-top:none}
+  .crow .n{width:26px;height:26px;background:var(--panel2);display:grid;place-items:center;
+    font-family:var(--pixel);font-size:10px;color:var(--muted);flex:none;border:1px solid var(--border)}
+  .crow.win .n{background:var(--gold);color:#1a1200;border-color:var(--gold-bright)}
+  .crow .rn{flex:1;min-width:0}
+  .crow .rn b{font-size:15px;color:var(--txt)}
+  .crow .rn small{display:block;color:var(--muted2);font-size:12.5px;margin-top:2px}
+  .crow .sc{font-family:var(--pixel);font-size:13px;color:var(--cyan-bright);flex:none}
+  .crow .pr{font-family:var(--pixel);font-size:12px;color:var(--green);flex:none}
+  .card .foot{margin-top:16px;font-size:13px;color:var(--muted2);border-top:1px dashed var(--border2);padding-top:12px}
+  .card .foot b{color:var(--gold)}
+
+  .tip{background:rgba(92,230,138,.06);border:2px solid rgba(92,230,138,.28);
+    padding:15px 16px;font-size:14px;color:var(--muted);margin-top:20px;box-shadow:3px 3px 0 rgba(0,0,0,.3)}
+  .tip b{color:var(--green)}
+
+  /* stack */
+  .stack{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .stackcard{background:var(--panel);border:2px solid var(--border);padding:18px;box-shadow:4px 4px 0 rgba(0,0,0,.3)}
+  .stackcard .t{font-family:var(--pixel);font-size:8px;color:var(--pink);letter-spacing:.5px;line-height:1.6}
+  .stackcard .m{font-family:var(--pixel);font-size:12px;color:var(--gold-bright);margin:12px 0 8px;line-height:1.5}
+  .stackcard .d{font-size:13.5px;color:var(--muted);line-height:1.55}
+  .stackcard .price{font-family:var(--pixel);font-size:10px;color:var(--green);margin-top:12px}
+
+  /* accordion */
+  .acc{border:2px solid var(--border);background:var(--panel);margin-bottom:11px;box-shadow:3px 3px 0 rgba(0,0,0,.3)}
+  .acc summary{cursor:pointer;list-style:none;padding:16px 18px;color:var(--txt);font-size:15.5px;
+    display:flex;justify-content:space-between;gap:12px;align-items:center}
+  .acc summary::-webkit-details-marker{display:none}
+  .acc summary::after{content:"[+]";color:var(--cyan);font-family:var(--mono);flex:none}
+  .acc[open] summary::after{content:"[-]";color:var(--gold)}
+  .acc[open] summary{color:var(--gold-bright)}
+  .acc .body{padding:0 18px 18px;color:var(--muted);font-size:14.5px;line-height:1.75}
+  .acc .body b{color:var(--txt)}
+
+  footer{border-top:2px solid var(--border);margin-top:26px;padding:38px 0 60px;text-align:center}
+  .footer-brand{display:inline-flex;align-items:center;gap:12px;margin-bottom:18px}
+  .footer-brand .logo{width:34px;height:34px;background:var(--gold);color:#1a1200;display:grid;place-items:center;
+    font-family:var(--pixel);font-size:10px;border:2px solid var(--gold-bright);box-shadow:3px 3px 0 rgba(0,0,0,.4)}
+  .footer-brand .ft{font-family:var(--pixel);font-size:13px;color:var(--gold-bright)}
+  footer .fine{color:var(--muted2);font-size:13px;line-height:1.8;max-width:660px;margin:0 auto}
+  footer .sign{color:var(--cyan-bright)}
+  .barcode{display:inline-block;margin-top:18px;font-family:var(--pixel);font-size:8px;color:var(--muted2);letter-spacing:2px}
+
+  @media(max-width:820px){
+    .cat-grid,.podium,.stack{grid-template-columns:1fr}
+    .pod.p1{transform:none}
+    .stats{grid-template-columns:repeat(3,1fr)}
+    .top-nav a:not(.cta){display:none}
+    .tbwa{display:none}
+  }
+  @media(max-width:520px){ .stats{grid-template-columns:repeat(2,1fr)} }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap top-inner">
+    <a class="brand" href="#top">
+      <span class="logo">IA</span>
+      <span><span class="bt">IA HUB</span><br><span class="bs">por Thales Carnete</span></span>
+      <span class="tbwa">iD\TBWA</span>
+    </a>
+    <nav class="top-nav">
+      <a href="#marketing">Marketing</a>
+      <a href="#categorias">Categorias</a>
+      <a href="#stack">Stack</a>
+      <a href="#faq">FAQ</a>
+      <a class="cta" href="#marketing">Ver ranking</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap" id="top">
+
+  <!-- HERO -->
+  <div class="hero">
+    <span class="badge"><span class="dot"></span>OPERATIONAL SYSTEMS · RECORTE 02/07/2026</span>
+    <h1>As melhores IAs para<span class="grad">Marketing, Copy &amp; Conteúdo</span></h1>
+    <p class="lead">Ranking prático das inteligências artificiais mais indicadas para agências de marketing: copywriting, criação de conteúdo, criativos, vídeo, voz e o que realmente gera resultado no fim das contas. Sem enrolação — o que colocar pra rodar hoje.</p>
+    <div class="byline">
+      <span class="author"><span class="ph">TC</span>Por Thales Carnete</span>
+      <span class="recorte">▸ Recorte único de 02/07/2026 (não atualiza sozinho)</span>
+    </div>
+    <div class="chips">
+      <a class="chip active" href="#marketing">🎯 Marketing &amp; Copy</a>
+      <a class="chip" href="#cat-copy">✍️ Copywriting</a>
+      <a class="chip" href="#cat-conteudo">📝 Conteúdo &amp; SEO</a>
+      <a class="chip" href="#cat-imagem">🎨 Imagem</a>
+      <a class="chip" href="#cat-video">🎬 Vídeo</a>
+      <a class="chip" href="#cat-audio">🎙️ Áudio &amp; Voz</a>
+      <a class="chip" href="#cat-custo">💰 Custo</a>
+      <a class="chip" href="#cat-codigo">⚙️ Código</a>
+    </div>
+  </div>
+
+  <!-- FEATURED: MARKETING -->
+  <section id="marketing">
+    <div class="featured hud">
+      <div class="kicker">▚ O QUE MAIS IMPORTA PRA UMA AGÊNCIA</div>
+      <div class="sec-head"><h2>🎯 Top IAs para Marketing &amp; Copy</h2></div>
+      <p class="sec-desc">Ranking editorial que combina qualidade de escrita persuasiva, domínio de português brasileiro, consistência de tom/marca, raciocínio criativo e custo por volume. É a resposta direta para: <b>"qual IA eu coloco pra escrever e criar na agência?"</b></p>
+
+      <div class="podium">
+        <div class="pod p2"><div class="bartop"></div>
+          <div class="rank-emoji">🥈</div>
+          <div class="score">96</div><div class="slab">Score MKT</div>
+          <div class="name">Claude Opus 4.8</div>
+          <div class="maker">Anthropic</div>
+          <div class="why">Melhor tom de marca e escrita longa. O "redator sênior" pra peças de alto valor.</div>
+        </div>
+        <div class="pod p1"><div class="bartop"></div>
+          <div class="rank-emoji">🥇</div>
+          <div class="score">98</div><div class="slab">Score MKT</div>
+          <div class="name">Claude Fable 5</div>
+          <div class="maker">Anthropic</div>
+          <div class="why">Mais criativo e persuasivo do recorte. Storytelling, headlines e copy que converte. Nº1 geral em inteligência (59.9 AA).</div>
+        </div>
+        <div class="pod p3"><div class="bartop"></div>
+          <div class="rank-emoji">🥉</div>
+          <div class="score">93</div><div class="slab">Score MKT</div>
+          <div class="name">GPT-5.5</div>
+          <div class="maker">OpenAI</div>
+          <div class="why">Coringa versátil: ideação, variações em volume e briefings. Ótimo pra brainstorm e escala.</div>
+        </div>
+      </div>
+
+      <div class="rank-list">
+        <div class="rank-item"><span class="pos">04</span><span class="avatar">G</span><span class="info"><div class="m">Gemini 3.5 Flash</div><div class="c">Google · <b>rápido e barato</b> pra conteúdo em volume, multimodal e pesquisa</div></span><span class="aa-score">90<span>Score</span></span></div>
+        <div class="rank-item"><span class="pos">05</span><span class="avatar">A</span><span class="info"><div class="m">Claude Sonnet 5</div><div class="c">Anthropic · <b>melhor custo/qualidade</b> pra copy do dia a dia ($3/1M)</div></span><span class="aa-score">89<span>Score</span></span></div>
+        <div class="rank-item"><span class="pos">06</span><span class="avatar">O</span><span class="info"><div class="m">GPT-5.4</div><div class="c">OpenAI · sólido pra roteiros, e-mail marketing e social ($2.63/1M)</div></span><span class="aa-score">86<span>Score</span></span></div>
+        <div class="rank-item"><span class="pos">07</span><span class="avatar">X</span><span class="info"><div class="m">Grok 4.x</div><div class="c">xAI · tom mais solto e atual, bom pra social e trends em tempo real</div></span><span class="aa-score">83<span>Score</span></span></div>
+        <div class="rank-item"><span class="pos">08</span><span class="avatar">Z</span><span class="info"><div class="m">GLM-5.2 (max)</div><div class="c">Z.ai · alternativa forte e econômica pra produção em escala ($1.40/1M)</div></span><span class="aa-score">80<span>Score</span></span></div>
+      </div>
+
+      <div class="tip"><b>▸ Recomendação prática:</b> use <b>Claude Fable 5 / Opus 4.8</b> nas peças que precisam converter (páginas de venda, anúncios, e-mails de lançamento) e <b>Gemini 3.5 Flash ou Sonnet 5</b> na produção de volume (posts, legendas, variações). Assim você equilibra qualidade e custo.</div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section>
+    <div class="stats">
+      <div class="stat"><div class="num">08</div><div class="lab">Categorias</div></div>
+      <div class="stat"><div class="num">50+</div><div class="lab">Modelos</div></div>
+      <div class="stat"><div class="num">06</div><div class="lab">Empresas líderes</div></div>
+      <div class="stat"><div class="num">02.07</div><div class="lab">Data do recorte</div></div>
+      <div class="stat"><div class="num">PT-BR</div><div class="lab">Foco português</div></div>
+      <div class="stat"><div class="num">100%</div><div class="lab">Foco resultado</div></div>
+    </div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <section id="categorias">
+    <div class="sec-head mb"><h2>🏅 Melhor IA por tarefa</h2><span class="sec-sub">o campeão de cada categoria</span></div>
+
+    <div class="cat-grid">
+
+      <div class="card" id="cat-copy">
+        <div class="chead"><span class="ico">✍️</span><h3>Copywriting</h3></div>
+        <div class="use">Anúncios, páginas de venda, e-mails, headlines</div>
+        <div class="crow win"><span class="n">1</span><span class="rn"><b>Claude Fable 5</b><small>Anthropic · o melhor em persuasão e storytelling</small></span><span class="sc">98</span></div>
+        <div class="crow"><span class="n">2</span><span class="rn"><b>Claude Opus 4.8</b><small>Anthropic · tom de marca impecável</small></span><span class="sc">96</span></div>
+        <div class="crow"><span class="n">3</span><span class="rn"><b>GPT-5.5</b><small>OpenAI · variações e ângulos em volume</small></span><span class="sc">92</span></div>
+        <div class="foot"><b>Veredito:</b> Claude domina copy que converte. GPT entra pra gerar volume de variações.</div>
+      </div>
+
+      <div class="card" id="cat-conteudo">
+        <div class="chead"><span class="ico">📝</span><h3>Conteúdo &amp; SEO</h3></div>
+        <div class="use">Blog, artigos longos, roteiros, SEO em escala</div>
+        <div class="crow win"><span class="n">1</span><span class="rn"><b>Claude Opus 4.8</b><small>Anthropic · texto longo coeso e bem estruturado</small></span><span class="sc">95</span></div>
+        <div class="crow"><span class="n">2</span><span class="rn"><b>Gemini 3.5 Flash</b><small>Google · rápido, barato e ótimo pra volume</small></span><span class="sc">91</span></div>
+        <div class="crow"><span class="n">3</span><span class="rn"><b>GPT-5.5</b><small>OpenAI · pesquisa e estruturação de pautas</small></span><span class="sc">90</span></div>
+        <div class="foot"><b>Veredito:</b> Opus pra artigo âncora; Gemini Flash pra escalar dezenas de posts por custo baixo.</div>
+      </div>
+
+      <div class="card" id="cat-imagem">
+        <div class="chead"><span class="ico">🎨</span><h3>Imagem &amp; Criativos</h3></div>
+        <div class="use">Anúncios, social, mockups, identidade visual</div>
+        <div class="crow win"><span class="n">1</span><span class="rn"><b>Ideogram 4.0</b><small>melhor renderização de texto em arte — ideal pra ads</small></span><span class="sc">94.5</span></div>
+        <div class="crow"><span class="n">2</span><span class="rn"><b>GPT Image 2</b><small>OpenAI · adesão ao prompt e edição nativa</small></span><span class="sc">93.8</span></div>
+        <div class="crow"><span class="n">3</span><span class="rn"><b>Recraft V4.1</b><small>vetor, mockups e controle de estilo pra designer</small></span><span class="sc">93.2</span></div>
+        <div class="foot"><b>Veredito:</b> Ideogram vence pra criativo com texto (a dor nº1 de ads). Recraft pra material de marca.</div>
+      </div>
+
+      <div class="card" id="cat-video">
+        <div class="chead"><span class="ico">🎬</span><h3>Vídeo</h3></div>
+        <div class="use">Reels, anúncios em vídeo, VSL, criativos animados</div>
+        <div class="crow win"><span class="n">1</span><span class="rn"><b>Sora 2</b><small>OpenAI · realismo + áudio e diálogo sincronizados</small></span><span class="sc">95.1</span></div>
+        <div class="crow"><span class="n">2</span><span class="rn"><b>Runway Gen-4.5</b><small>alta fidelidade e controle criativo profissional</small></span><span class="sc">94.4</span></div>
+        <div class="crow"><span class="n">3</span><span class="rn"><b>Luma Ray3.2</b><small>direção, continuidade e workflow via API</small></span><span class="sc">92.8</span></div>
+        <div class="foot"><b>Veredito:</b> Sora 2 pra vídeo com fala pronto pra usar; Runway pra controle fino de time criativo.</div>
+      </div>
+
+      <div class="card" id="cat-audio">
+        <div class="chead"><span class="ico">🎙️</span><h3>Áudio &amp; Voz</h3></div>
+        <div class="use">Locução de VSL, podcast, jingles, dublagem</div>
+        <div class="crow win"><span class="n">1</span><span class="rn"><b>Eleven v3</b><small>ElevenLabs · voz expressiva + clonagem, 70+ idiomas</small></span><span class="sc">94.2</span></div>
+        <div class="crow"><span class="n">2</span><span class="rn"><b>Speech 2.8</b><small>MiniMax · TTS HD com clonagem via API</small></span><span class="sc">90.6</span></div>
+        <div class="crow"><span class="n">3</span><span class="rn"><b>Suno v4.5</b><small>música e jingles prontos pra campanha</small></span><span class="sc">88.9</span></div>
+        <div class="foot"><b>Veredito:</b> Eleven v3 é padrão de mercado pra locução PT-BR. Suno pra trilha/jingle original.</div>
+      </div>
+
+      <div class="card" id="cat-custo">
+        <div class="chead"><span class="ico">💰</span><h3>Custo-benefício</h3></div>
+        <div class="use">Automação, chatbots, produção massiva de texto</div>
+        <div class="crow win"><span class="n">1</span><span class="rn"><b>DeepSeek V4 Flash</b><small>$0.14/1M · qualidade boa (AA 40.3) por centavos</small></span><span class="pr">$0.14</span></div>
+        <div class="crow"><span class="n">2</span><span class="rn"><b>MiniMax-M3</b><small>$0.30/1M · AA 44.4, ótimo equilíbrio</small></span><span class="pr">$0.30</span></div>
+        <div class="crow"><span class="n">3</span><span class="rn"><b>Gemini 3.5 Flash</b><small>$1.50/1M · qualidade alta a preço baixo</small></span><span class="pr">$1.50</span></div>
+        <div class="foot"><b>Veredito:</b> pra alto volume (WhatsApp, automações) DeepSeek/MiniMax cortam custo sem derrubar qualidade.</div>
+      </div>
+
+      <div class="card" id="cat-codigo">
+        <div class="chead"><span class="ico">⚙️</span><h3>Código</h3></div>
+        <div class="use">Landing pages, integrações, automações internas</div>
+        <div class="crow win"><span class="n">1</span><span class="rn"><b>Claude Fable 5</b><small>Anthropic · líder no AA Coding Index (76.5)</small></span><span class="sc">76.5</span></div>
+        <div class="crow"><span class="n">2</span><span class="rn"><b>GPT-5.5</b><small>OpenAI · forte em automação e integrações (74.9)</small></span><span class="sc">74.9</span></div>
+        <div class="crow"><span class="n">3</span><span class="rn"><b>Claude Opus 4.8</b><small>Anthropic · robusto pra código de produção (74.3)</small></span><span class="sc">74.3</span></div>
+        <div class="foot"><b>Veredito:</b> Claude/GPT pra montar páginas e automações; Gemini Flash ($1.50) se o custo pesar.</div>
+      </div>
+
+      <div class="card" id="cat-ptbr">
+        <div class="chead"><span class="ico">🇧🇷</span><h3>Português (BR)</h3></div>
+        <div class="use">Naturalidade, gírias, contexto local, atendimento</div>
+        <div class="crow win"><span class="n">1</span><span class="rn"><b>Claude (Opus / Fable 5)</b><small>Anthropic · o mais natural e fluente em PT-BR</small></span><span class="sc">A+</span></div>
+        <div class="crow"><span class="n">2</span><span class="rn"><b>Gemini 3.5</b><small>Google · forte em contexto local e pesquisa</small></span><span class="sc">A</span></div>
+        <div class="crow"><span class="n">3</span><span class="rn"><b>GPT-5.5</b><small>OpenAI · consistente, ótimo pra atendimento</small></span><span class="sc">A</span></div>
+        <div class="foot"><b>Veredito:</b> Claude e Gemini lideram em português brasileiro — o que mais importa pro público local.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- STACK -->
+  <section id="stack">
+    <div class="sec-head mb"><h2>🧰 Stack ideal da agência</h2><span class="sec-sub">mais resultado por real investido</span></div>
+    <div class="stack">
+      <div class="stackcard"><div class="t">CÉREBRO / COPY</div><div class="m">Claude Opus 4.8</div><div class="d">Copy que converte, tom de marca e peças de alto valor. Onde a qualidade não pode falhar.</div><div class="price">~$5/1M</div></div>
+      <div class="stackcard"><div class="t">VOLUME / CONTEÚDO</div><div class="m">Gemini 3.5 Flash</div><div class="d">Posts, legendas, variações e SEO em escala com custo baixo. O motor de produção.</div><div class="price">~$1.50/1M</div></div>
+      <div class="stackcard"><div class="t">CRIATIVOS VISUAIS</div><div class="m">Ideogram + Sora 2</div><div class="d">Imagem de anúncio com texto perfeito e vídeo pronto pra reels/ads.</div><div class="price">DESDE $0.03/img</div></div>
+      <div class="stackcard"><div class="t">VOZ / ÁUDIO</div><div class="m">ElevenLabs v3</div><div class="d">Locução de VSL, reels e conteúdo em áudio com voz natural em PT-BR.</div><div class="price">DESDE $5/mês</div></div>
+      <div class="stackcard"><div class="t">ALTO VOLUME / BOTS</div><div class="m">DeepSeek V4 Flash</div><div class="d">Automações, atendimento e produção massiva por centavos por milhão de tokens.</div><div class="price">~$0.14/1M</div></div>
+      <div class="stackcard"><div class="t">LANDING / AUTOMAÇÃO</div><div class="m">Claude Fable 5</div><div class="d">Páginas, integrações e automações internas com o melhor score de código.</div><div class="price">~$10/1M</div></div>
+    </div>
+    <div class="tip"><b>▸ Resumo:</b> não existe "uma IA pra tudo". A agência que ganha mistura um modelo forte de copy (Claude), um barato de volume (Gemini/DeepSeek) e ferramentas dedicadas de imagem, vídeo e voz.</div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="sec-head mb"><h2>&gt; Perguntas Frequentes</h2></div>
+    <details class="acc" open><summary>Qual a melhor IA para copywriting em 2026?</summary><div class="body">No recorte de 02/07/2026, <b>Claude Fable 5</b> e <b>Claude Opus 4.8</b> (Anthropic) lideram em escrita persuasiva e tom de marca. Para gerar muitas variações rápido, o <b>GPT-5.5</b> complementa bem.</div></details>
+    <details class="acc"><summary>E se eu precisar produzir MUITO conteúdo com orçamento apertado?</summary><div class="body">Use <b>Gemini 3.5 Flash</b> (~$1.50/1M) para conteúdo em volume e <b>DeepSeek V4 Flash</b> (~$0.14/1M) para automações e atendimento. A qualidade continua boa e o custo despenca.</div></details>
+    <details class="acc"><summary>Qual IA gera as melhores imagens para anúncios?</summary><div class="body"><b>Ideogram 4.0</b> — porque renderiza texto dentro da imagem melhor que todas, que é justamente a maior dor em criativos de anúncio. Para material de marca e vetor, <b>Recraft V4.1</b>.</div></details>
+    <details class="acc"><summary>Qual funciona melhor em português brasileiro?</summary><div class="body"><b>Claude</b> (Anthropic) e <b>Gemini</b> (Google) têm a melhor naturalidade em PT-BR. É o fator mais importante para conteúdo voltado ao público local.</div></details>
+    <details class="acc"><summary>Preciso pagar pelo modelo mais caro sempre?</summary><div class="body">Não. A jogada certa é combinar: modelo premium (Claude) nas peças que convertem e modelo barato (Gemini Flash / DeepSeek) na produção de volume. Você paga caro só onde traz retorno.</div></details>
+    <details class="acc"><summary>Esses números são atualizados sozinhos?</summary><div class="body">Não. Este é um <b>recorte único de 02 de julho de 2026</b>, curado manualmente. Os dados de base vêm de rankings públicos de benchmark (inteligência, código, imagem, vídeo e áudio), reorganizados com foco no que uma agência de marketing usa na prática.</div></details>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-brand"><span class="logo">IA</span><span class="ft">IA HUB</span><span class="tbwa">iD\TBWA</span></div>
+    <p class="fine">
+      <span class="sign">Curadoria e análise por Thales Carnete.</span><br>
+      Recorte único de 02 de julho de 2026 — foco em marketing, copywriting e criação de conteúdo.
+      Os scores de marketing são uma composição editorial; os dados de base derivam de benchmarks públicos de inteligência, código, imagem, vídeo e áudio. Não substitui teste no seu próprio caso de uso.
+    </p>
+    <div class="barcode">▚▚▚ OPERATIONAL SYSTEMS INFOGRAPHIC ▚▚▚</div>
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll('.chip').forEach(c=>{
+    c.addEventListener('click',()=>{
+      document.querySelector('.chip.active')?.classList.remove('active');
+      c.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
