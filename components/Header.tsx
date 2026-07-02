@@ -17,6 +17,12 @@ export function Header() {
         </Link>
 
         <div className="flex items-center gap-4">
+          <Link
+            href="/bastidores"
+            className="font-mono text-[10px] tracking-[0.25em] uppercase text-white/45 hover:text-y transition-colors"
+          >
+            Bastidores
+          </Link>
           {/* Circuit node decoration */}
           <div className="hidden sm:flex items-center gap-1.5 text-white/20">
             <span className="w-1 h-1 bg-y/60 rotate-45" />
