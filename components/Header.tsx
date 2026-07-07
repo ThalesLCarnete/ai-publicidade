@@ -18,6 +18,14 @@ export function Header() {
 
         <div className="flex items-center gap-4">
           <Link
+            href="/"
+            aria-label="Voltar aos posts"
+            className="flex items-center gap-1.5 font-mono text-[10px] tracking-[0.25em] uppercase text-white/45 hover:text-y transition-colors"
+          >
+            <span className="w-1 h-1 bg-y rotate-45 shrink-0" />
+            Drops
+          </Link>
+          <Link
             href="/bastidores"
             className="font-mono text-[10px] tracking-[0.25em] uppercase text-white/45 hover:text-y transition-colors"
           >
