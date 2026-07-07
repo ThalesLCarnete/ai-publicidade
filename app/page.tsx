@@ -7,6 +7,12 @@ import { ArticleCard } from '@/components/ArticleCard'
 // Posts novos do n8n aparecem em até 1 min.
 export const revalidate = 60
 
+const MODES = [
+  { href: '/', label: 'Drops', desc: 'O feed de notícias', active: true },
+  { href: '/bastidores', label: 'Bastidores', desc: 'Agentes, debate e processo', active: false },
+  { href: '/ia-hub', label: 'IA Hub', desc: 'Benchmark das IAs', active: false },
+]
+
 const TICKER = [
   'GPT-5', 'GEMINI 2.5 PRO', 'CLAUDE OPUS', 'FLUX.1-SCHNELL', 'LLAMA 3',
   'SORA 2', 'GROK 3', 'MISTRAL LARGE', 'DALL·E 4', 'DEEPSEEK R2',
@@ -81,6 +87,40 @@ export default async function HomePage() {
               </div>
             </div>
           </div>
+
+          {/* ── Menu de modos ─────────────────────────────── */}
+          <nav aria-label="Seções do site" className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {MODES.map((m) => (
+              <Link
+                key={m.href}
+                href={m.href}
+                aria-current={m.active ? 'page' : undefined}
+                className={[
+                  'group relative flex flex-col gap-1 px-5 py-4 border transition-colors duration-300',
+                  m.active
+                    ? 'bg-y border-y text-ink'
+                    : 'border-white/15 text-white hover:border-y hover:bg-y/[0.06]',
+                ].join(' ')}
+              >
+                {/* cantos bracket */}
+                <span className={`absolute top-1.5 left-1.5 w-3 h-3 border-t border-l ${m.active ? 'border-ink/30' : 'border-white/15 group-hover:border-y'} transition-colors`} />
+                <span className={`absolute bottom-1.5 right-1.5 w-3 h-3 border-b border-r ${m.active ? 'border-ink/30' : 'border-white/15 group-hover:border-y'} transition-colors`} />
+
+                <span className="flex items-center gap-2">
+                  <span className={`w-1.5 h-1.5 rotate-45 shrink-0 ${m.active ? 'bg-ink' : 'bg-y'}`} />
+                  <span className="font-display text-xl tracking-widest uppercase leading-none">
+                    {m.label}
+                  </span>
+                  {!m.active && (
+                    <span className="ml-auto text-y opacity-0 group-hover:opacity-100 transition-opacity text-sm leading-none">→</span>
+                  )}
+                </span>
+                <span className={`font-mono text-[9px] tracking-[0.2em] uppercase ${m.active ? 'text-ink/60' : 'text-white/35 group-hover:text-white/55'} transition-colors`}>
+                  {m.desc}
+                </span>
+              </Link>
+            ))}
+          </nav>
         </div>
 
         {/* Ticker */}
