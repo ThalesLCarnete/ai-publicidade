@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { DebatePlayer } from '@/components/DebatePlayer'
 
 export const metadata = {
   title: 'Bastidores — como o IA Traduzida é feito',
@@ -124,6 +125,17 @@ export default function BastidoresPage() {
             nenhum post vai ao ar sem um <span className="text-y">sim</span> humano.
           </p>
         </div>
+      </section>
+
+      {/* ── Debate ao vivo (a atração principal) ─────────── */}
+      <Label>🕹️ DEBATE AO VIVO · A ATRAÇÃO PRINCIPAL</Label>
+      <section className="max-w-5xl mx-auto px-6">
+        <p className="text-sm text-ink/55 dark:text-white/55 max-w-2xl leading-relaxed mb-6">
+          Antes de cada post ir ao ar, Caio e Rafael brigam por ele. Aperte start e assista a um
+          debate <b className="text-ink dark:text-white font-semibold">real</b> — reproduzido
+          palavra por palavra — que definiu as notas de um post publicado neste site.
+        </p>
+        <DebatePlayer />
       </section>
 
       {/* ── O processo ───────────────────────────────────── */}

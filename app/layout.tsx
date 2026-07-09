@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
-import { Bebas_Neue, Geist } from 'next/font/google'
+import { Bebas_Neue, Geist, Press_Start_2P } from 'next/font/google'
 import './globals.css'
 import { Header } from '@/components/Header'
 
 const bebas = Bebas_Neue({ weight: '400', subsets: ['latin'], variable: '--font-bebas' })
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
+// fonte pixel do DebatePlayer (Bastidores) — carregada globalmente pra evitar FOUT
+const pixel = Press_Start_2P({ weight: '400', subsets: ['latin'], variable: '--font-pixel' })
 
 export const metadata: Metadata = {
   title: 'Neural Drop — IA que importa',
@@ -18,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="pt-BR"
       data-theme="light"
       suppressHydrationWarning
-      className={`${bebas.variable} ${geist.variable}`}
+      className={`${bebas.variable} ${geist.variable} ${pixel.variable}`}
     >
       <head>
         <script

@@ -8,9 +8,9 @@ import { ArticleCard } from '@/components/ArticleCard'
 export const revalidate = 60
 
 const MODES = [
-  { href: '/', label: 'Drops', desc: 'O feed de notícias', active: true },
-  { href: '/bastidores', label: 'Bastidores', desc: 'Agentes, debate e processo', active: false },
-  { href: '/ia-hub', label: 'IA Hub', desc: 'Benchmark das IAs', active: false },
+  { href: '/', label: 'Drops', desc: 'O feed de notícias', active: true, live: false },
+  { href: '/bastidores', label: 'Bastidores', desc: 'Assista Caio × Rafael debatendo', active: false, live: true },
+  { href: '/ia-hub', label: 'IA Hub', desc: 'Benchmark das IAs', active: false, live: false },
 ]
 
 const TICKER = [
@@ -111,9 +111,17 @@ export default async function HomePage() {
                   <span className="font-display text-xl tracking-widest uppercase leading-none">
                     {m.label}
                   </span>
-                  {!m.active && (
-                    <span className="ml-auto text-y opacity-0 group-hover:opacity-100 transition-opacity text-sm leading-none">→</span>
-                  )}
+                  <span className="ml-auto flex items-center gap-2">
+                    {m.live && (
+                      <span className="flex items-center gap-1.5 font-mono text-[8px] tracking-[0.2em] text-y border border-y/40 px-1.5 py-0.5">
+                        <span className="w-1 h-1 bg-y rotate-45 pulse-dot" />
+                        AO VIVO
+                      </span>
+                    )}
+                    {!m.active && (
+                      <span className="text-y opacity-0 group-hover:opacity-100 transition-opacity text-sm leading-none">→</span>
+                    )}
+                  </span>
                 </span>
                 <span className={`font-mono text-[9px] tracking-[0.2em] uppercase ${m.active ? 'text-ink/60' : 'text-white/35 group-hover:text-white/55'} transition-colors`}>
                   {m.desc}
